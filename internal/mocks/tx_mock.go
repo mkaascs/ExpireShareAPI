@@ -12,31 +12,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockTxBeginner is a mock of Beginner interface.
-type MockTxBeginner struct {
+// MockBeginner is a mock of Beginner interface.
+type MockBeginner struct {
 	ctrl     *gomock.Controller
-	recorder *MockTxBeginnerMockRecorder
+	recorder *MockBeginnerMockRecorder
 }
 
-// MockTxBeginnerMockRecorder is the mock recorder for MockTxBeginner.
-type MockTxBeginnerMockRecorder struct {
-	mock *MockTxBeginner
+// MockBeginnerMockRecorder is the mock recorder for MockBeginner.
+type MockBeginnerMockRecorder struct {
+	mock *MockBeginner
 }
 
-// NewMockTxBeginner creates a new mock instance.
-func NewMockTxBeginner(ctrl *gomock.Controller) *MockTxBeginner {
-	mock := &MockTxBeginner{ctrl: ctrl}
-	mock.recorder = &MockTxBeginnerMockRecorder{mock}
+// NewMockBeginner creates a new mock instance.
+func NewMockBeginner(ctrl *gomock.Controller) *MockBeginner {
+	mock := &MockBeginner{ctrl: ctrl}
+	mock.recorder = &MockBeginnerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockTxBeginner) EXPECT() *MockTxBeginnerMockRecorder {
+func (m *MockBeginner) EXPECT() *MockBeginnerMockRecorder {
 	return m.recorder
 }
 
 // BeginTx mocks base method.
-func (m *MockTxBeginner) BeginTx(ctx context.Context) (tx.Tx, error) {
+func (m *MockBeginner) BeginTx(ctx context.Context) (tx.Tx, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BeginTx", ctx)
 	ret0, _ := ret[0].(tx.Tx)
@@ -45,9 +45,9 @@ func (m *MockTxBeginner) BeginTx(ctx context.Context) (tx.Tx, error) {
 }
 
 // BeginTx indicates an expected call of BeginTx.
-func (mr *MockTxBeginnerMockRecorder) BeginTx(ctx interface{}) *gomock.Call {
+func (mr *MockBeginnerMockRecorder) BeginTx(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*MockTxBeginner)(nil).BeginTx), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*MockBeginner)(nil).BeginTx), ctx)
 }
 
 // MockTx is a mock of Tx interface.

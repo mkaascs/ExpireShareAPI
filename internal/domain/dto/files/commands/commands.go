@@ -31,6 +31,10 @@ type GetFile struct {
 	RequestingUserInfo
 }
 
+type GetAllFiles struct {
+	RequestingUserInfo
+}
+
 type DeleteFile struct {
 	Alias string
 	RequestingUserInfo

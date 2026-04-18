@@ -8,7 +8,6 @@ import (
 	"expire-share/internal/domain/dto/files/commands"
 	"expire-share/internal/domain/dto/files/results"
 	"expire-share/internal/lib/log/sl"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -87,8 +86,7 @@ func New(getter FileGetter, log *slog.Logger) http.HandlerFunc {
 		render.Status(r, http.StatusOK)
 		render.JSON(w, r, Response{
 			DownloadsLeft: file.DownloadsLeft,
-			ExpiresIn: fmt.Sprintf("%02dm%02dh%02ds",
-				int(file.ExpiresIn.Hours()), int(file.ExpiresIn.Minutes())%60, int(file.ExpiresIn.Seconds())%60),
+			ExpiresIn:     util.TimeString(file.ExpiresIn),
 		})
 	}
 }
