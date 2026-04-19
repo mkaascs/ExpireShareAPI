@@ -18,16 +18,16 @@ A file sharing service with expiration and download limits. Upload files with op
 
 ## Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| **Language** | Go 1.24+ |
-| **HTTP Router** | chi |
-| **Auth** | JWT via [auth-service](https://github.com/mkaascs/auth-service) (gRPC) |
-| **Database** | MySQL 8.0 |
-| **File Storage** | Local filesystem |
-| **Logging** | slog (structured JSON/text) |
-| **Migrations** | golang-migrate |
-| **Documentation** | Swagger (swaggo) |
+| Component | Technology                                                            |
+|-----------|-----------------------------------------------------------------------|
+| **Language** | Go 1.24+                                                              |
+| **HTTP Router** | chi                                                                   |
+| **Auth** | JWT via [auth-service](https://github.com/mkaascs/AuthService) (gRPC) |
+| **Database** | MySQL 8.0                                                             |
+| **File Storage** | Local filesystem                                                      |
+| **Logging** | slog (structured JSON/text)                                           |
+| **Migrations** | golang-migrate                                                        |
+| **Documentation** | Swagger (swaggo)                                                      |
 
 ---
 
@@ -46,12 +46,13 @@ Full Swagger documentation available at `/swagger/index.html` when running local
 
 ### Files
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/api/upload` | Required | Upload a file |
-| `GET` | `/api/file/{alias}` | Required | Get file info (downloads left, expires in) |
-| `DELETE` | `/api/file/{alias}` | Required | Delete a file |
-| `GET` | `/download/{alias}` | — | Download a file |
+| Method | Endpoint | Auth | Description                                         |
+|--------|----------|------|-----------------------------------------------------|
+| `POST` | `/api/upload` | Required | Upload a file                                       |
+| `GET` | `/api/file` | Required | Get all user file info (downloads left, expires in) |
+| `GET` | `/api/file/{alias}` | Required | Get file info (downloads left, expires in)          |
+| `DELETE` | `/api/file/{alias}` | Required | Delete a file                                       |
+| `GET` | `/download/{alias}` | — | Download a file                                     |
 
 #### Upload request (multipart/form-data)
 
