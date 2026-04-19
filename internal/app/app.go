@@ -13,6 +13,7 @@ import (
 	"expire-share/internal/delivery/handlers/api/auth/register"
 	"expire-share/internal/delivery/handlers/api/files/delete"
 	"expire-share/internal/delivery/handlers/api/files/get"
+	"expire-share/internal/delivery/handlers/api/files/getAll"
 	"expire-share/internal/delivery/handlers/api/upload"
 	"expire-share/internal/delivery/handlers/download"
 	myMiddleware "expire-share/internal/delivery/middlewares"
@@ -86,9 +87,13 @@ func (a *App) MustMountHandlers() {
 			r.Use(myMiddleware.NewAuth(authClient, a.logger))
 			r.Post("/upload", upload.New(fileService, a.logger, a.config))
 
-			r.Route("/file/{alias}", func(r chi.Router) {
-				r.Get("/", get.New(fileService, a.logger))
-				r.Delete("/", delete.New(fileService, a.logger))
+			r.Route("/file", func(r chi.Router) {
+				r.Get("/", getAll.New(fileService, a.logger))
+
+				r.Route("/{alias}", func(r chi.Router) {
+					r.Get("/", get.New(fileService, a.logger))
+					r.Delete("/", delete.New(fileService, a.logger))
+				})
 			})
 		})
 
