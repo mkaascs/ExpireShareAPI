@@ -93,6 +93,45 @@ func (fr *FileRepo) GetFileByAlias(ctx context.Context, alias string) (*entities
 	return &file, nil
 }
 
+func (fr *FileRepo) GetFilesByUserID(ctx context.Context, userID int64) ([]entities.File, error) {
+	const fn = "repository.mysql.FileRepo.GetFilesByUserID"
+	log := fr.log.With(slog.String("fn", fn))
+
+	rows, err := fr.DB.QueryContext(ctx, `SELECT file_name, alias, downloads_left, loaded_at, expires_at, password_hash, user_id FROM files WHERE user_id = ? AND expires_at > NOW()`, userID)
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to query sql: %w", fn, err)
+	}
+
+	defer func(rows *sql.Rows) {
+		if err := rows.Close(); err != nil {
+			log.Warn("failed to close rows", sl.Error(err))
+		}
+	}(rows)
+
+	var files []entities.File
+
+	for rows.Next() {
+		var file entities.File
+		if err := rows.Scan(&file.Filename,
+			&file.Alias,
+			&file.DownloadsLeft,
+			&file.LoadedAt,
+			&file.ExpiresAt,
+			&file.PasswordHash,
+			&file.UserID); err != nil {
+			return files, fmt.Errorf("%s: failed to scan row: %w", fn, err)
+		}
+
+		files = append(files, file)
+	}
+
+	if err := rows.Err(); err != nil {
+		return files, fmt.Errorf("%s: failed to iterate rows: %w", fn, err)
+	}
+
+	return files, nil
+}
+
 func (fr *FileRepo) CountByUserID(ctx context.Context, userId int64) (int, error) {
 	const fn = "repository.mysql.FileRepo.CountByUserId"
 
