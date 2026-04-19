@@ -140,3 +140,18 @@ func (mr *MockFileRepoMockRecorder) GetFileByAlias(ctx, alias interface{}) *gomo
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFileByAlias", reflect.TypeOf((*MockFileRepo)(nil).GetFileByAlias), ctx, alias)
 }
+
+// GetFilesByUserID mocks base method.
+func (m *MockFileRepo) GetFilesByUserID(ctx context.Context, userID int64) ([]entities.File, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFilesByUserID", ctx, userID)
+	ret0, _ := ret[0].([]entities.File)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFilesByUserID indicates an expected call of GetFilesByUserID.
+func (mr *MockFileRepoMockRecorder) GetFilesByUserID(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilesByUserID", reflect.TypeOf((*MockFileRepo)(nil).GetFilesByUserID), ctx, userID)
+}
