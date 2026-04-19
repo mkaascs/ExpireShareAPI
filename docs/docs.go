@@ -243,6 +243,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/file/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get info about all uploaded user files. Requires authentication.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/getAll.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/file/{alias}": {
             "get": {
                 "security": [
@@ -293,6 +332,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
                     }
                 }
             },
@@ -339,6 +384,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "File not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -509,6 +560,35 @@ const docTemplate = `{
                 },
                 "expires_in": {
                     "type": "string"
+                }
+            }
+        },
+        "getAll.GetFile": {
+            "type": "object",
+            "properties": {
+                "downloads_left": {
+                    "type": "integer"
+                },
+                "expires_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "getAll.Response": {
+            "description": "Response with all user files info",
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/getAll.GetFile"
+                    }
                 }
             }
         },

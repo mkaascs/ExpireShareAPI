@@ -41,6 +41,7 @@ type FileGetter interface {
 //	@Failure		401		{object}	response.Response	"Unauthorized"
 //	@Failure		403		{object}	response.Response	"Forbidden (not file owner)"
 //	@Failure		404		{object}	response.Response	"File not found"
+//	@Failure		500		{object}	response.Response	"Internal server error"
 //	@Router			/api/file/{alias} [get]
 func New(getter FileGetter, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

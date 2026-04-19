@@ -8,10 +8,11 @@ import (
 	"expire-share/internal/domain/dto/files/commands"
 	"expire-share/internal/domain/dto/files/results"
 	"expire-share/internal/lib/log/sl"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
+
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 )
 
 type GetFile struct {
@@ -19,6 +20,9 @@ type GetFile struct {
 	ExpiresIn     string `json:"expires_at"`
 }
 
+// Response represents info about all user files
+//
+//	@Description	Response with all user files info
 type Response struct {
 	response.Response
 	Files []GetFile `json:"files,omitempty"`
@@ -28,6 +32,17 @@ type AllFilesGetter interface {
 	GetAllFiles(ctx context.Context, command commands.GetAllFiles) ([]results.GetFile, error)
 }
 
+// New @Summary Get all user files info
+//
+//	@Description	Get info about all uploaded user files. Requires authentication.
+//	@Tags			file
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Success		200	{object}	Response
+//	@Failure		401	{object}	response.Response	"Unauthorized"
+//	@Failure		500	{object}	response.Response	"Internal server error"
+//	@Router			/api/file/ [get]
 func New(getter AllFilesGetter, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "http.file.getAll.New"

@@ -11,6 +11,25 @@ definitions:
       expires_in:
         type: string
     type: object
+  getAll.GetFile:
+    properties:
+      downloads_left:
+        type: integer
+      expires_at:
+        type: string
+    type: object
+  getAll.Response:
+    description: Response with all user files info
+    properties:
+      errors:
+        items:
+          type: string
+        type: array
+      files:
+        items:
+          $ref: '#/definitions/getAll.GetFile'
+        type: array
+    type: object
   login.Request:
     description: Login credentials for authentication
     properties:
@@ -286,6 +305,30 @@ paths:
             $ref: '#/definitions/response.Response'
       tags:
       - auth
+  /api/file/:
+    get:
+      consumes:
+      - application/json
+      description: Get info about all uploaded user files. Requires authentication.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/getAll.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      tags:
+      - file
   /api/file/{alias}:
     delete:
       consumes:
@@ -313,6 +356,10 @@ paths:
             $ref: '#/definitions/response.Response'
         "404":
           description: File not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
           schema:
             $ref: '#/definitions/response.Response'
       security:
@@ -347,6 +394,10 @@ paths:
             $ref: '#/definitions/response.Response'
         "404":
           description: File not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
           schema:
             $ref: '#/definitions/response.Response'
       security:
