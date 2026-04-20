@@ -8,6 +8,9 @@ http_server:
   port: 6010
   timeout: 4s
   idle_timeout: 60s
+  cors:
+    allowed_credentials: true
+    max_age: 300 # 5m
 service:
   default_ttl: 1h
   default_max_downloads: 1

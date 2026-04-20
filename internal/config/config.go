@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
@@ -39,6 +40,14 @@ type HttpServer struct {
 	Port        int           `yaml:"port" env-required:"true"`
 	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
 	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
+	CORS        `yaml:"cors"`
+}
+
+type CORS struct {
+	AllowedOrigins     []string `yaml:"-"`
+	AllowedOriginsEnv  string   `yaml:"-" env:"CORS_ALLOWED_ORIGINS" env-required:"true"`
+	AllowedCredentials bool     `yaml:"allow_credentials" env-default:"true"`
+	MaxAge             int      `yaml:"max_age" env-default:"86400"`
 }
 
 type AuthService struct {
@@ -83,6 +92,13 @@ func Load() (*Config, error) {
 	if err := cleanenv.ReadConfig(cfgPath, &cfg); err != nil {
 		return nil, fmt.Errorf("failed to read config: %w", err)
 	}
+
+	origins := strings.Split(cfg.AllowedOriginsEnv, ",")
+	for index := range origins {
+		origins[index] = strings.TrimSpace(origins[index])
+	}
+
+	cfg.AllowedOrigins = origins
 
 	bytes, err := sizes.ToBytes(cfg.MaxFileSize)
 	if err != nil {

@@ -5,9 +5,12 @@ storage:
   path: "./storage/"
   max_file_size: "500mb"
 http_server:
-  port: 6010
+  port: 8080
   timeout: 4s
   idle_timeout: 60s
+  cors:
+    allowed_credentials: true
+    max_age: 86400 # 24h
 service:
   default_ttl: 1h
   default_max_downloads: 1
