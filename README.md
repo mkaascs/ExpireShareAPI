@@ -78,10 +78,11 @@ Password-protected files require the `X-Resource-Password` header on download an
 
 ### Environment variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `CONFIG_PATH` | Path to config file | Yes |
-| `MYSQL_ROOT_PASSWORD` | MySQL root password | Yes |
+| Variable | Description              | Required |
+|----------|--------------------------|----------|
+| `CONFIG_PATH` | Path to config file      | Yes |
+| `MYSQL_ROOT_PASSWORD` | MySQL root password      | Yes |
+| `CORS_ALLOWED_ORIGINS` | Allowed origins for CORS | Yes |
 
 ### Config file (config/dev.yaml)
 
@@ -93,9 +94,12 @@ storage:
   path: "./storage/"
   max_file_size: "500mb"
 http_server:
-  port: 6010
+  port: 8080
   timeout: 4s
   idle_timeout: 60s
+  cors:
+    allowed_credentials: true
+    max_age: 86400 # 24h
 service:
   default_ttl: 1h
   default_max_downloads: 1
@@ -106,6 +110,7 @@ service:
     max_uploaded_files_for_user: 1
 auth_service:
   addr: "auth-service:5505"
+
 ```
 ---
 ## Docker networking
