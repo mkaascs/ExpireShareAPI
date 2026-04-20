@@ -69,7 +69,7 @@ func (a *App) MustMountMiddlewares() {
 			"X-Request-ID",
 		},
 
-		ExposedHeaders: []string{"Link"},
+		ExposedHeaders: []string{"Link", "Content-Disposition", "Content-Length"},
 		MaxAge:         a.config.CORS.MaxAge,
 	}))
 
