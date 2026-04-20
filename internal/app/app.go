@@ -22,6 +22,7 @@ import (
 	"expire-share/internal/infrastructure/storage/local"
 	"expire-share/internal/services/files"
 	"expire-share/internal/services/worker"
+	"github.com/go-chi/cors"
 	"log/slog"
 	"net/http"
 
@@ -56,6 +57,22 @@ func New(config config.Config, logger *slog.Logger) *App {
 }
 
 func (a *App) MustMountMiddlewares() {
+	a.HTTP.Router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   a.config.CORS.AllowedOrigins,
+		AllowCredentials: a.config.CORS.AllowedCredentials,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{
+			"Authorization",
+			"Content-Type",
+			"Accept",
+			"X-Resource-Password",
+			"X-Request-ID",
+		},
+
+		ExposedHeaders: []string{"Link"},
+		MaxAge:         a.config.CORS.MaxAge,
+	}))
+
 	a.HTTP.Router.Use(middleware.RequestID)
 	a.HTTP.Router.Use(middleware.RealIP)
 	a.HTTP.Router.Use(middleware.Recoverer)
