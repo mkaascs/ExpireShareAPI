@@ -21,6 +21,6 @@ COPY --from=builder /expire-share .
 COPY config/ ./config/
 COPY migrations/ ./migrations/
 
-EXPOSE 6010
+EXPOSE 8080
 
 CMD ["/app/expire-share"]

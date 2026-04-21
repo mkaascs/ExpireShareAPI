@@ -19,10 +19,11 @@ services:
   expire-share:
     build: .
     ports:
-      - "6010:6010"
+      - "8080:8080"
     environment:
       CONFIG_PATH: ${CONFIG_PATH}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     depends_on:
       mysql-expire:
         condition: service_healthy
