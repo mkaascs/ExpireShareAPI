@@ -29,6 +29,8 @@ func (fs *Service) GetAllFiles(ctx context.Context, command commands.GetAllFiles
 	result := make([]results.GetFile, 0, len(filesInfo))
 	for _, fileInfo := range filesInfo {
 		result = append(result, results.GetFile{
+			Alias:         fileInfo.Alias,
+			Filename:      fileInfo.Filename,
 			DownloadsLeft: fileInfo.DownloadsLeft,
 			ExpiresIn:     time.Until(fileInfo.ExpiresAt),
 		})

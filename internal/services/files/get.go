@@ -35,6 +35,8 @@ func (fs *Service) GetFileByAlias(ctx context.Context, command commands.GetFile)
 	}
 
 	return &results.GetFile{
+		Alias:         fileInfo.Alias,
+		Filename:      fileInfo.Filename,
 		DownloadsLeft: fileInfo.DownloadsLeft,
 		ExpiresIn:     time.Until(fileInfo.ExpiresAt),
 	}, nil

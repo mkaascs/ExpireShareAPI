@@ -41,6 +41,7 @@ func TestService_GetFileByAlias(t *testing.T) {
 			DoAndReturn(func(_ context.Context, alias string) (*entities.File, error) {
 				require.Equal(t, command.Alias, alias)
 				return &entities.File{
+					Filename:      "file.txt",
 					Alias:         command.Alias,
 					PasswordHash:  "",
 					UserID:        command.UserID,
@@ -53,6 +54,8 @@ func TestService_GetFileByAlias(t *testing.T) {
 		result, err := fileService.GetFileByAlias(context.Background(), command)
 		require.NoError(t, err)
 		require.NotNil(t, result)
+		require.Equal(t, "file.txt", result.Filename)
+		require.Equal(t, command.Alias, result.Alias)
 		require.Equal(t, int16(5), result.DownloadsLeft)
 		require.Positive(t, result.ExpiresIn)
 	})
@@ -80,6 +83,7 @@ func TestService_GetFileByAlias(t *testing.T) {
 				Roles:  []entities.UserRole{entities.RoleAdmin},
 			},
 		})
+
 		require.NoError(t, err)
 		require.NotNil(t, result)
 	})

@@ -21,6 +21,7 @@ import (
 //	@Description	Response with file info
 type Response struct {
 	response.Response
+	Filename      string `json:"filename"`
 	DownloadsLeft int16  `json:"downloads_left,omitempty"`
 	ExpiresIn     string `json:"expires_in,omitempty"`
 }
@@ -86,6 +87,7 @@ func New(getter FileGetter, log *slog.Logger) http.HandlerFunc {
 		log.Info("file info was sent", slog.String("alias", alias))
 		render.Status(r, http.StatusOK)
 		render.JSON(w, r, Response{
+			Filename:      file.Filename,
 			DownloadsLeft: file.DownloadsLeft,
 			ExpiresIn:     util.TimeString(file.ExpiresIn),
 		})
