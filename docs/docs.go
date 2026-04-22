@@ -560,16 +560,25 @@ const docTemplate = `{
                 },
                 "expires_in": {
                     "type": "string"
+                },
+                "filename": {
+                    "type": "string"
                 }
             }
         },
         "getAll.GetFile": {
             "type": "object",
             "properties": {
+                "alias": {
+                    "type": "string"
+                },
                 "downloads_left": {
                     "type": "integer"
                 },
                 "expires_at": {
+                    "type": "string"
+                },
+                "filename": {
                     "type": "string"
                 }
             }

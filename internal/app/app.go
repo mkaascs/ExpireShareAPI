@@ -22,9 +22,10 @@ import (
 	"expire-share/internal/infrastructure/storage/local"
 	"expire-share/internal/services/files"
 	"expire-share/internal/services/worker"
-	"github.com/go-chi/cors"
 	"log/slog"
 	"net/http"
+
+	"github.com/go-chi/cors"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
