@@ -16,6 +16,7 @@ var (
 	ErrInvalidAccessToken  = errors.New("invalid access token")
 	ErrInvalidRefreshToken = errors.New("invalid refresh token")
 	ErrInvalidCredentials  = errors.New("invalid login or password")
+	ErrInvalidArgument     = errors.New("invalid argument")
 
 	ErrFilePasswordRequired = errors.New("file password required for access")
 	ErrFilePasswordInvalid  = errors.New("invalid file password")

@@ -2,8 +2,10 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"expire-share/internal/domain/entities"
 	domainErrors "expire-share/internal/domain/entities/errors"
+	"fmt"
 
 	authv1 "github.com/mkaascs/AuthProto/gen/go/auth"
 	"google.golang.org/grpc/codes"
@@ -29,22 +31,31 @@ func pbUserToDomain(user *authv1.UserInfo) entities.User {
 	}
 }
 
-func mapGrpcError(grpcErr error) error {
-	if status.Code(grpcErr) == codes.Unauthenticated {
+func mapGrpcError(err error) error {
+	st, ok := status.FromError(err)
+	if !ok {
+		return errors.New("failed to get grpc status from error")
+	}
+
+	if st.Code() == codes.Unauthenticated {
 		return domainErrors.ErrInvalidCredentials
 	}
 
-	if status.Code(grpcErr) == codes.AlreadyExists {
+	if st.Code() == codes.AlreadyExists {
 		return domainErrors.ErrUserAlreadyExists
 	}
 
-	if status.Code(grpcErr) == codes.Canceled {
+	if st.Code() == codes.InvalidArgument {
+		return fmt.Errorf("%w: %s", domainErrors.ErrInvalidArgument, st.Message())
+	}
+
+	if st.Code() == codes.Canceled {
 		return context.Canceled
 	}
 
-	if status.Code(grpcErr) == codes.DeadlineExceeded {
+	if st.Code() == codes.DeadlineExceeded {
 		return context.DeadlineExceeded
 	}
 
-	return grpcErr
+	return st.Err()
 }

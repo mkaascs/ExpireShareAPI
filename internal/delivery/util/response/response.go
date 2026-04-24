@@ -108,6 +108,13 @@ func RenderAuthServiceError(w http.ResponseWriter, r *http.Request, err error) b
 		return true
 	}
 
+	if errors.Is(err, domainErrors.ErrInvalidArgument) {
+		RenderError(w, r,
+			http.StatusBadRequest,
+			err.Error())
+		return true
+	}
+
 	if errors.Is(err, domainErrors.ErrInvalidAccessToken) {
 		RenderError(w, r,
 			http.StatusUnauthorized,
