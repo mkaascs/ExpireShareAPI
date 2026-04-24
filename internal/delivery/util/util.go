@@ -12,6 +12,6 @@ func IsCtxError(err error) bool {
 }
 
 func TimeString(duration time.Duration) string {
-	return fmt.Sprintf("%02dm%02dh%02ds",
+	return fmt.Sprintf("%02dh%02dm%02ds",
 		int(duration.Hours()), int(duration.Minutes())%60, int(duration.Seconds())%60)
 }
