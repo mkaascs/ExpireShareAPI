@@ -19,9 +19,9 @@ import (
 //
 //	@Description	Registration data for new user account
 type Request struct {
-	Login    string `json:"login" validate:"required,min=3" example:"user"`
+	Login    string `json:"login" validate:"required,min=3,max=64" example:"user"`
 	Email    string `json:"email" validate:"required,email" example:"user@example.com"`
-	Password string `json:"password" validate:"required,min=5" example:"expire123"`
+	Password string `json:"password" validate:"required,min=6,max=128" example:"expire123"`
 }
 
 // Response represents registration response

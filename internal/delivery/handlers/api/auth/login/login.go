@@ -19,8 +19,8 @@ import (
 //
 //	@Description	Login credentials for authentication
 type Request struct {
-	Login    string `json:"login" validate:"required,min=3" example:"user"`
-	Password string `json:"password" validate:"required,min=5" example:"expire123"`
+	Login    string `json:"login" validate:"required,min=3,max=64" example:"user"`
+	Password string `json:"password" validate:"required,min=6,max=128" example:"expire123"`
 }
 
 // Response represents login response

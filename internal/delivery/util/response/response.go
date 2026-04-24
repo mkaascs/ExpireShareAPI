@@ -110,7 +110,7 @@ func RenderAuthServiceError(w http.ResponseWriter, r *http.Request, err error) b
 
 	if errors.Is(err, domainErrors.ErrInvalidArgument) {
 		RenderError(w, r,
-			http.StatusBadRequest,
+			http.StatusUnprocessableEntity,
 			err.Error())
 		return true
 	}
