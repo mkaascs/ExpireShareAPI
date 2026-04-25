@@ -129,6 +129,20 @@ func RenderAuthServiceError(w http.ResponseWriter, r *http.Request, err error) b
 		return true
 	}
 
+	if errors.Is(err, domainErrors.ErrRoleNotExist) {
+		RenderError(w, r,
+			http.StatusNotFound,
+			"user have not this role")
+		return true
+	}
+
+	if errors.Is(err, domainErrors.ErrUserNotFound) {
+		RenderError(w, r,
+			http.StatusNotFound,
+			"user not found")
+		return true
+	}
+
 	if errors.Is(err, domainErrors.ErrInvalidCredentials) {
 		RenderError(w, r,
 			http.StatusUnauthorized,
