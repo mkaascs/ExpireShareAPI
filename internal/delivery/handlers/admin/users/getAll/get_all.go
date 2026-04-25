@@ -24,7 +24,7 @@ type Response struct {
 }
 
 type AllUsersGetter interface {
-	GetUsers(ctx context.Context, files commands.GetAllUsers) (results.GetAllUsers, error)
+	GetAllUsers(ctx context.Context, files commands.GetAllUsers) (results.GetAllUsers, error)
 }
 
 func New(getter AllUsersGetter, log *slog.Logger) http.HandlerFunc {
@@ -43,7 +43,7 @@ func New(getter AllUsersGetter, log *slog.Logger) http.HandlerFunc {
 			role = &r
 		}
 
-		result, err := getter.GetUsers(r.Context(), commands.GetAllUsers{
+		result, err := getter.GetAllUsers(r.Context(), commands.GetAllUsers{
 			Page:  page,
 			Limit: limit,
 			Role:  role,

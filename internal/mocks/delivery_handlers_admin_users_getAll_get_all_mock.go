@@ -37,9 +37,9 @@ func (m *MockAllUsersGetter) EXPECT() *MockAllUsersGetterMockRecorder {
 }
 
 // GetUsers mocks base method.
-func (m *MockAllUsersGetter) GetUsers(ctx context.Context, files commands.GetAllUsers) (results.GetAllUsers, error) {
+func (m *MockAllUsersGetter) GetAllUsers(ctx context.Context, files commands.GetAllUsers) (results.GetAllUsers, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUsers", ctx, files)
+	ret := m.ctrl.Call(m, "GetAllUsers", ctx, files)
 	ret0, _ := ret[0].(results.GetAllUsers)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -48,5 +48,5 @@ func (m *MockAllUsersGetter) GetUsers(ctx context.Context, files commands.GetAll
 // GetUsers indicates an expected call of GetUsers.
 func (mr *MockAllUsersGetterMockRecorder) GetUsers(ctx, files interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockAllUsersGetter)(nil).GetUsers), ctx, files)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUsers", reflect.TypeOf((*MockAllUsersGetter)(nil).GetAllUsers), ctx, files)
 }

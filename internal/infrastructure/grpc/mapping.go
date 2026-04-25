@@ -46,6 +46,10 @@ func mapGrpcError(err error) error {
 		return domainErrors.ErrUserAlreadyExists
 	}
 
+	if st.Code() == codes.NotFound {
+		return domainErrors.ErrUserNotFound
+	}
+
 	if st.Code() == codes.InvalidArgument {
 		return fmt.Errorf("%w: %s", domainErrors.ErrInvalidArgument, st.Message())
 	}
