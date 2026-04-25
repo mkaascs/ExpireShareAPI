@@ -73,5 +73,6 @@ func New(assigning RoleAssigning, log *slog.Logger) http.HandlerFunc {
 
 		log.Info("role assigned successfully", slog.Int64("user_id", userID), slog.String("role", request.Role))
 		render.Status(r, http.StatusCreated)
+		render.JSON(w, r, Response{})
 	}
 }

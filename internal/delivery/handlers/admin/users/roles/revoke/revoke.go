@@ -74,5 +74,6 @@ func New(revoker RoleRevoker, log *slog.Logger) http.HandlerFunc {
 
 		log.Info("role revoked successfully", slog.String("role", request.Role), slog.Int64("user_id", userID))
 		render.Status(r, http.StatusNoContent)
+		render.JSON(w, r, Response{})
 	}
 }

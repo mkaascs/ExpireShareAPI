@@ -25,6 +25,7 @@ func pbUserToDomain(user *authv1.UserInfo) entities.User {
 	return entities.User{
 		ID:        user.UserId,
 		Login:     user.Login,
+		Email:     user.Email,
 		Roles:     pbRolesToDomain(user.Roles),
 		IsAdmin:   user.IsAdmin,
 		CreatedAt: user.CreatedAt.AsTime(),
