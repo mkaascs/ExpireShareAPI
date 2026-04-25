@@ -80,5 +80,6 @@ func New(deleter FileDeleter, log *slog.Logger) http.HandlerFunc {
 		}
 
 		render.Status(r, http.StatusNoContent)
+		render.JSON(w, r, Response{})
 	}
 }

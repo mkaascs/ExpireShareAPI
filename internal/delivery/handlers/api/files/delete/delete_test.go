@@ -39,7 +39,7 @@ func TestHandler_Delete(t *testing.T) {
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, newDeleteRequest("abc123", claims))
 
-		require.Equal(t, http.StatusOK, w.Code)
+		require.Equal(t, http.StatusNoContent, w.Code)
 	})
 
 	t.Run("missing user claims", func(t *testing.T) {
