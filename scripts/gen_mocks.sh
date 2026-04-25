@@ -15,7 +15,9 @@ find "internal/" -name "*.go" \
         continue
     fi
 
-    base=$(basename "$file" .go)
+    rel="${file#internal/}"
+    base="${rel//\//_}"
+    base="${base%.go}"
     output_file="$MOCKS_DIR/${base}_mock.go"
 
     echo "SUCCESS: $file → $output_file"
