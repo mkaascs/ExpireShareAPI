@@ -54,6 +54,15 @@ Full Swagger documentation available at `/swagger/index.html` when running local
 | `DELETE` | `/api/file/{alias}` | Required | Delete a file                                       |
 | `GET` | `/download/{alias}` | — | Download a file                                     |
 
+### Admin
+
+| Method | Endpoint                             | Auth | Description           |
+|--------|--------------------------------------|------|-----------------------|
+| `GET`  | `/api/admin/users`                   | Required | Get all users info    |
+| `GET`  | `/api/admin/users/{id}`              | Required | Get user info by ID   |
+| `POST` | `/api/admin/users/{id}/roles/assign` | Required | Assign a role to user |
+| `POST` | `/api/admin/users/{id}/roles/revoke` | Required | Revoke a role of user |
+
 #### Upload request (multipart/form-data)
 
 | Field | Type | Required | Description |
@@ -83,6 +92,7 @@ Password-protected files require the `X-Resource-Password` header on download an
 | `CONFIG_PATH` | Path to config file      | Yes |
 | `MYSQL_ROOT_PASSWORD` | MySQL root password      | Yes |
 | `CORS_ALLOWED_ORIGINS` | Allowed origins for CORS | Yes |
+| `ADMIN_SECRET_BASE64` | Base64 secret for admins | Yes |
 
 ### Config file (config/dev.yaml)
 
