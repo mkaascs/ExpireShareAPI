@@ -24,7 +24,7 @@ type Response struct {
 }
 
 type AllUsersGetter interface {
-	GetAllUsers(ctx context.Context, files commands.GetAllUsers) (results.GetAllUsers, error)
+	GetAllUsers(ctx context.Context, command commands.GetAllUsers) (*results.GetAllUsers, error)
 }
 
 func New(getter AllUsersGetter, log *slog.Logger) http.HandlerFunc {

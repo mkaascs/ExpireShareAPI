@@ -7,6 +7,10 @@ import (
 	httpApp "expire-share/internal/app/http"
 	"expire-share/internal/app/mysql"
 	"expire-share/internal/config"
+	userGet "expire-share/internal/delivery/handlers/admin/users/get"
+	userGetAll "expire-share/internal/delivery/handlers/admin/users/getAll"
+	"expire-share/internal/delivery/handlers/admin/users/roles/assign"
+	"expire-share/internal/delivery/handlers/admin/users/roles/revoke"
 	"expire-share/internal/delivery/handlers/api/auth/login"
 	"expire-share/internal/delivery/handlers/api/auth/logout"
 	"expire-share/internal/delivery/handlers/api/auth/refresh"
@@ -85,6 +89,7 @@ func (a *App) MustMountHandlers() {
 	fileRepo := repo.NewFileRepo(a.MySql.DB, a.logger)
 	fileStorage := local.NewFileStorage(a.config.Storage, a.logger)
 	authClient := grpc.NewAuthClient(a.Auth.GRPCConn)
+	userClient := grpc.NewUserClient(a.Auth.GRPCConn)
 
 	fileService := files.New(fileRepo, fileStorage, a.logger, a.config)
 
@@ -111,6 +116,23 @@ func (a *App) MustMountHandlers() {
 				r.Route("/{alias}", func(r chi.Router) {
 					r.Get("/", get.New(fileService, a.logger))
 					r.Delete("/", delete.New(fileService, a.logger))
+				})
+			})
+		})
+
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(myMiddleware.NewAdminAuth(a.logger))
+
+			r.Route("/users", func(r chi.Router) {
+				r.Get("/{id}", userGet.New(userClient, a.logger))
+				r.Get("/", userGetAll.New(userClient, a.logger))
+
+				r.Route("/{id}/roles", func(r chi.Router) {
+					r.With(myMiddleware.NewBodyParser[assign.Request](a.config.Service, a.logger)).
+						Post("/assign", assign.New(userClient, a.logger))
+
+					r.With(myMiddleware.NewBodyParser[revoke.Request](a.config.Service, a.logger)).
+						Post("/revoke", revoke.New(userClient, a.logger))
 				})
 			})
 		})

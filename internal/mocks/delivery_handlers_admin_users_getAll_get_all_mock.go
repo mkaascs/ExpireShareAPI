@@ -36,17 +36,17 @@ func (m *MockAllUsersGetter) EXPECT() *MockAllUsersGetterMockRecorder {
 	return m.recorder
 }
 
-// GetUsers mocks base method.
-func (m *MockAllUsersGetter) GetAllUsers(ctx context.Context, files commands.GetAllUsers) (results.GetAllUsers, error) {
+// GetAllUsers mocks base method.
+func (m *MockAllUsersGetter) GetAllUsers(ctx context.Context, command commands.GetAllUsers) (*results.GetAllUsers, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllUsers", ctx, files)
-	ret0, _ := ret[0].(results.GetAllUsers)
+	ret := m.ctrl.Call(m, "GetAllUsers", ctx, command)
+	ret0, _ := ret[0].(*results.GetAllUsers)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetUsers indicates an expected call of GetUsers.
-func (mr *MockAllUsersGetterMockRecorder) GetUsers(ctx, files interface{}) *gomock.Call {
+// GetAllUsers indicates an expected call of GetAllUsers.
+func (mr *MockAllUsersGetterMockRecorder) GetAllUsers(ctx, command interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUsers", reflect.TypeOf((*MockAllUsersGetter)(nil).GetAllUsers), ctx, files)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUsers", reflect.TypeOf((*MockAllUsersGetter)(nil).GetAllUsers), ctx, command)
 }

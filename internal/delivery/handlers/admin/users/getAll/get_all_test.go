@@ -31,12 +31,12 @@ func TestHandler_GetAllUsers(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllUsersGetter(ctrl)
 		mockGetter.EXPECT().
-			GetUsers(gomock.Any(), commands.GetAllUsers{Page: 1, Limit: 10, Role: nil}).
-			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (results.GetAllUsers, error) {
+			GetAllUsers(gomock.Any(), commands.GetAllUsers{Page: 1, Limit: 10, Role: nil}).
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (*results.GetAllUsers, error) {
 				require.Equal(t, 1, cmd.Page)
 				require.Equal(t, 10, cmd.Limit)
 				require.Nil(t, cmd.Role)
-				return results.GetAllUsers{Users: expectedUsers, Total: 2}, nil
+				return &results.GetAllUsers{Users: expectedUsers, Total: 2}, nil
 			})
 
 		handler := New(mockGetter, logger)
@@ -60,8 +60,8 @@ func TestHandler_GetAllUsers(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllUsersGetter(ctrl)
 		mockGetter.EXPECT().
-			GetUsers(gomock.Any(), commands.GetAllUsers{Page: 3, Limit: 20, Role: nil}).
-			Return(results.GetAllUsers{Users: []entities.User{}, Total: 0}, nil)
+			GetAllUsers(gomock.Any(), commands.GetAllUsers{Page: 3, Limit: 20, Role: nil}).
+			Return(&results.GetAllUsers{Users: []entities.User{}, Total: 0}, nil)
 
 		handler := New(mockGetter, logger)
 		w := httptest.NewRecorder()
@@ -83,11 +83,11 @@ func TestHandler_GetAllUsers(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllUsersGetter(ctrl)
 		mockGetter.EXPECT().
-			GetUsers(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (results.GetAllUsers, error) {
+			GetAllUsers(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (*results.GetAllUsers, error) {
 				require.NotNil(t, cmd.Role)
 				require.Equal(t, role, *cmd.Role)
-				return results.GetAllUsers{Users: []entities.User{}, Total: 0}, nil
+				return &results.GetAllUsers{Users: []entities.User{}, Total: 0}, nil
 			})
 
 		handler := New(mockGetter, logger)
@@ -103,10 +103,10 @@ func TestHandler_GetAllUsers(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllUsersGetter(ctrl)
 		mockGetter.EXPECT().
-			GetUsers(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (results.GetAllUsers, error) {
+			GetAllUsers(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (*results.GetAllUsers, error) {
 				require.Equal(t, 1, cmd.Page)
-				return results.GetAllUsers{}, nil
+				return &results.GetAllUsers{}, nil
 			})
 
 		handler := New(mockGetter, logger)
@@ -122,10 +122,10 @@ func TestHandler_GetAllUsers(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllUsersGetter(ctrl)
 		mockGetter.EXPECT().
-			GetUsers(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (results.GetAllUsers, error) {
+			GetAllUsers(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (*results.GetAllUsers, error) {
 				require.Equal(t, 1, cmd.Page)
-				return results.GetAllUsers{}, nil
+				return &results.GetAllUsers{}, nil
 			})
 
 		handler := New(mockGetter, logger)
@@ -141,10 +141,10 @@ func TestHandler_GetAllUsers(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllUsersGetter(ctrl)
 		mockGetter.EXPECT().
-			GetUsers(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (results.GetAllUsers, error) {
+			GetAllUsers(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllUsers) (*results.GetAllUsers, error) {
 				require.Equal(t, 100, cmd.Limit)
-				return results.GetAllUsers{}, nil
+				return &results.GetAllUsers{}, nil
 			})
 
 		handler := New(mockGetter, logger)
@@ -160,8 +160,8 @@ func TestHandler_GetAllUsers(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllUsersGetter(ctrl)
 		mockGetter.EXPECT().
-			GetUsers(gomock.Any(), gomock.Any()).
-			Return(results.GetAllUsers{}, context.Canceled)
+			GetAllUsers(gomock.Any(), gomock.Any()).
+			Return(&results.GetAllUsers{}, context.Canceled)
 
 		handler := New(mockGetter, logger)
 		w := httptest.NewRecorder()
@@ -176,8 +176,8 @@ func TestHandler_GetAllUsers(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllUsersGetter(ctrl)
 		mockGetter.EXPECT().
-			GetUsers(gomock.Any(), gomock.Any()).
-			Return(results.GetAllUsers{}, fmt.Errorf("db error"))
+			GetAllUsers(gomock.Any(), gomock.Any()).
+			Return(&results.GetAllUsers{}, fmt.Errorf("db error"))
 
 		handler := New(mockGetter, logger)
 		w := httptest.NewRecorder()

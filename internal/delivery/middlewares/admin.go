@@ -30,7 +30,16 @@ func NewAdminAuth(log *slog.Logger) func(next http.Handler) http.Handler {
 				return
 			}
 
-			if subtle.ConstantTimeCompare([]byte(secret), adminSecret) == 1 {
+			decodedSecret, err := base64.StdEncoding.DecodeString(secret)
+			if err != nil {
+				log.Error("failed to decode secret", sl.Error(err))
+				response.RenderError(w, r,
+					http.StatusInternalServerError,
+					"internal server error")
+				return
+			}
+
+			if subtle.ConstantTimeCompare(decodedSecret, adminSecret) == 1 {
 				next.ServeHTTP(w, r)
 				return
 			}
