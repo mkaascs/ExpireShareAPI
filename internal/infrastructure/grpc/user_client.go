@@ -6,6 +6,7 @@ import (
 	"expire-share/internal/domain/dto/users/results"
 	"expire-share/internal/domain/entities"
 	domainErrors "expire-share/internal/domain/entities/errors"
+
 	authv1 "github.com/mkaascs/AuthProto/gen/go/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

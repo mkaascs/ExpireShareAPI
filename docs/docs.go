@@ -15,6 +15,263 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/admin/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get paginated list of all users. Optionally filter by role. Requires admin secret authorization.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by role (user, vip, admin)",
+                        "name": "role",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Users list",
+                        "schema": {
+                            "$ref": "#/definitions/internal_delivery_handlers_admin_users_getAll.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user info by their ID. Requires admin secret authorization.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User info",
+                        "schema": {
+                            "$ref": "#/definitions/internal_delivery_handlers_admin_users_get.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/users/{id}/roles/assign": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Assign a role to user by their ID. Requires admin secret authorization.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Role to assign",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/assign.Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Role assigned",
+                        "schema": {
+                            "$ref": "#/definitions/assign.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/users/{id}/roles/revoke": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Revoke a role from user by their ID. Requires admin secret authorization.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Role to revoke",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/revoke.Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Role revoked",
+                        "schema": {
+                            "$ref": "#/definitions/revoke.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid user ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "description": "Authenticate user with login and password. Returns access and refresh tokens.",
@@ -264,7 +521,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/getAll.Response"
+                            "$ref": "#/definitions/internal_delivery_handlers_api_files_getAll.Response"
                         }
                     },
                     "401": {
@@ -312,7 +569,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/get.Response"
+                            "$ref": "#/definitions/internal_delivery_handlers_api_files_get.Response"
                         }
                     },
                     "401": {
@@ -545,24 +802,52 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "get.Response": {
-            "description": "Response with file info",
+        "assign.Request": {
+            "description": "Role assignment request",
             "type": "object",
             "properties": {
-                "downloads_left": {
-                    "type": "integer"
-                },
+                "role": {
+                    "type": "string",
+                    "example": "vip"
+                }
+            }
+        },
+        "assign.Response": {
+            "description": "Empty success response",
+            "type": "object",
+            "properties": {
                 "errors": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-                },
-                "expires_in": {
+                }
+            }
+        },
+        "entities.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
                     "type": "string"
                 },
-                "filename": {
+                "email": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "isAdmin": {
+                    "type": "boolean"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -583,7 +868,70 @@ const docTemplate = `{
                 }
             }
         },
-        "getAll.Response": {
+        "internal_delivery_handlers_admin_users_get.Response": {
+            "description": "Response with user info",
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "user": {
+                    "$ref": "#/definitions/entities.User"
+                }
+            }
+        },
+        "internal_delivery_handlers_admin_users_getAll.Response": {
+            "description": "Response with paginated users list",
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.User"
+                    }
+                }
+            }
+        },
+        "internal_delivery_handlers_api_files_get.Response": {
+            "description": "Response with file info",
+            "type": "object",
+            "properties": {
+                "downloads_left": {
+                    "type": "integer"
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "expires_in": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_delivery_handlers_api_files_getAll.Response": {
             "description": "Response with all user files info",
             "type": "object",
             "properties": {
@@ -611,12 +959,14 @@ const docTemplate = `{
             "properties": {
                 "login": {
                     "type": "string",
+                    "maxLength": 64,
                     "minLength": 3,
                     "example": "user"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 5,
+                    "maxLength": 128,
+                    "minLength": 6,
                     "example": "expire123"
                 }
             }
@@ -720,12 +1070,14 @@ const docTemplate = `{
                 },
                 "login": {
                     "type": "string",
+                    "maxLength": 64,
                     "minLength": 3,
                     "example": "user"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 5,
+                    "maxLength": 128,
+                    "minLength": 6,
                     "example": "expire123"
                 }
             }
@@ -746,6 +1098,28 @@ const docTemplate = `{
             }
         },
         "response.Response": {
+            "type": "object",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "revoke.Request": {
+            "description": "Role revocation request",
+            "type": "object",
+            "properties": {
+                "role": {
+                    "type": "string",
+                    "example": "vip"
+                }
+            }
+        },
+        "revoke.Response": {
+            "description": "Empty success response",
             "type": "object",
             "properties": {
                 "errors": {
