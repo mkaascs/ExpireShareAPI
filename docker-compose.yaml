@@ -4,8 +4,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ExpireShare
-    ports:
-      - "3308:3306"
     volumes:
       - mysql_expire_data:/var/lib/mysql
     healthcheck:
@@ -24,6 +22,7 @@ services:
       CONFIG_PATH: ${CONFIG_PATH}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      ADMIN_SECRET_BASE64: ${ADMIN_SECRET_BASE64}
     depends_on:
       mysql-expire:
         condition: service_healthy
