@@ -6,6 +6,7 @@ import (
 	"expire-share/internal/app/auth"
 	httpApp "expire-share/internal/app/http"
 	"expire-share/internal/app/mysql"
+	redisApp "expire-share/internal/app/redis"
 	"expire-share/internal/config"
 	userGet "expire-share/internal/delivery/handlers/admin/users/get"
 	userGetAll "expire-share/internal/delivery/handlers/admin/users/getAll"
@@ -40,6 +41,7 @@ type App struct {
 	HTTP  *httpApp.App
 	MySql *mysql.App
 	Auth  *auth.App
+	Redis *redisApp.App
 
 	config config.Config
 	logger *slog.Logger
@@ -47,6 +49,7 @@ type App struct {
 
 func New(config config.Config, logger *slog.Logger) *App {
 	httpServer := httpApp.New(logger, config.HttpServer)
+	redis := redisApp.New(logger, config.Redis)
 	authApp := auth.New(logger, config.AuthService)
 
 	mysql.MustMigrate(logger, config.DbConnectionString)
@@ -56,6 +59,7 @@ func New(config config.Config, logger *slog.Logger) *App {
 		HTTP:   httpServer,
 		MySql:  mysqlApp,
 		Auth:   authApp,
+		Redis:  redis,
 		config: config,
 		logger: logger,
 	}

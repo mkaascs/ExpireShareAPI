@@ -27,6 +27,7 @@ type Config struct {
 	HttpServer         `yaml:"http_server"`
 	Service            `yaml:"service"`
 	AuthService        `yaml:"auth_service"`
+	Redis              `yaml:"redis"`
 }
 
 type Storage struct {
@@ -41,6 +42,15 @@ type HttpServer struct {
 	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
 	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
 	CORS        `yaml:"cors"`
+}
+
+type Redis struct {
+	Addr        string        `yaml:"addr" env-required:"true"`
+	Password    string        `yaml:"-" env:"REDIS_PASSWORD" env-required:"true"`
+	DB          int           `yaml:"db" env-default:"0"`
+	DialTimeout time.Duration `yaml:"dial_timeout" env-default:"10s"`
+	Timeout     time.Duration `yaml:"read_timeout" env-default:"5s"`
+	MaxRetries  int           `yaml:"max_retries" env-default:"1"`
 }
 
 type CORS struct {

@@ -11,6 +11,12 @@ http_server:
   cors:
     allowed_credentials: true
     max_age: 86400 # 24h
+redis:
+  addr: "redis-expire:6379"
+  db: 0
+  dial_timeout: 10s
+  timeout: 5s
+  max_retries: 1
 service:
   default_ttl: 1h
   default_max_downloads: 1

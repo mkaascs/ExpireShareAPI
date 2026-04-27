@@ -52,7 +52,7 @@ func (a *App) Connect() error {
 	conn.Connect()
 	if !tryToConnect(context.Background(), conn) {
 		log.Error("failed to connect to auth service")
-		return fmt.Errorf("%s: failed to connect to auth service: %w", fn, err)
+		return fmt.Errorf("%s: failed to connect to auth service", fn)
 	}
 
 	log.Info("connected to grpc server successfully")
