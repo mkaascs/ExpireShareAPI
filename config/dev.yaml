@@ -17,6 +17,10 @@ redis:
   dial_timeout: 10s
   timeout: 5s
   max_retries: 1
+rate_limiter:
+  max_attempts: 5
+  window: 20m
+  block_duration: 5m
 service:
   default_ttl: 1h
   default_max_downloads: 1

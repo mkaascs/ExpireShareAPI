@@ -26,6 +26,7 @@ type Config struct {
 	Storage            `yaml:"storage"`
 	HttpServer         `yaml:"http_server"`
 	Service            `yaml:"service"`
+	RateLimiter        `yaml:"rate_limiter"`
 	AuthService        `yaml:"auth_service"`
 	Redis              `yaml:"redis"`
 }
@@ -51,6 +52,12 @@ type Redis struct {
 	DialTimeout time.Duration `yaml:"dial_timeout" env-default:"10s"`
 	Timeout     time.Duration `yaml:"read_timeout" env-default:"5s"`
 	MaxRetries  int           `yaml:"max_retries" env-default:"1"`
+}
+
+type RateLimiter struct {
+	MaxAttempts   int           `yaml:"max_attempts" env-default:"5"`
+	Window        time.Duration `yaml:"window" env-default:"20m"`
+	BlockDuration time.Duration `yaml:"block_duration" env-default:"5m"`
 }
 
 type CORS struct {
