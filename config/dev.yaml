@@ -28,8 +28,8 @@ rate_limiter:
     block_duration: 24h
   files:
     max_attempts: 10
-    window: 15m
-    block_duration: 15m
+    window: 20m
+    block_duration: 10m
 service:
   default_ttl: 1h
   default_max_downloads: 1
