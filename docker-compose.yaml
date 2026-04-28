@@ -52,6 +52,7 @@ services:
 volumes:
   mysql_expire_data:
   expire_files:
+  redis_data:
 
 networks:
   shared-network:
