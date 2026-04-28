@@ -8,6 +8,7 @@ var (
 	ErrNoDownloadsLeft     = errors.New("there is no downloads left")
 	ErrFileSizeTooBig      = errors.New("file size too big")
 	ErrUploadLimitExceeded = errors.New("upload limit exceeded")
+	ErrTooManyRequests     = errors.New("too many requests")
 
 	ErrForbidden           = errors.New("forbidden")
 	ErrUserNotFound        = errors.New("user not found")

@@ -136,6 +136,13 @@ func RenderAuthServiceError(w http.ResponseWriter, r *http.Request, err error) b
 		return true
 	}
 
+	if errors.Is(err, domainErrors.ErrTooManyRequests) {
+		RenderError(w, r,
+			http.StatusTooManyRequests,
+			"too many requests. try again later")
+		return true
+	}
+
 	if errors.Is(err, domainErrors.ErrUserNotFound) {
 		RenderError(w, r,
 			http.StatusNotFound,

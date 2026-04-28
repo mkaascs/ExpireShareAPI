@@ -46,6 +46,10 @@ func mapGrpcError(err error) error {
 		return domainErrors.ErrUserAlreadyExists
 	}
 
+	if st.Code() == codes.ResourceExhausted {
+		return domainErrors.ErrTooManyRequests
+	}
+
 	if st.Code() == codes.NotFound {
 		return domainErrors.ErrUserNotFound
 	}
