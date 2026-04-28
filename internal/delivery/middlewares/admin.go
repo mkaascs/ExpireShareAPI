@@ -3,6 +3,7 @@ package middlewares
 import (
 	"crypto/subtle"
 	"encoding/base64"
+	"expire-share/internal/delivery/util"
 	"expire-share/internal/delivery/util/response"
 	"expire-share/internal/lib/log/sl"
 	"log/slog"
@@ -23,7 +24,8 @@ func NewAdminAuth(rateLimiter RateLimiter, log *slog.Logger) func(next http.Hand
 		}
 
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.RemoteAddr == "" {
+			ip := util.ExtractIP(r.RemoteAddr)
+			if ip == "" {
 				log.Error("remote addr is empty. use middleware.RealIP at first")
 				response.RenderError(w, r,
 					http.StatusInternalServerError,
@@ -31,11 +33,11 @@ func NewAdminAuth(rateLimiter RateLimiter, log *slog.Logger) func(next http.Hand
 				return
 			}
 
-			allowed, err := rateLimiter.Allow(r.Context(), rateLimiterFieldName, r.RemoteAddr)
+			allowed, err := rateLimiter.Allow(r.Context(), rateLimiterFieldName, ip)
 			if err != nil {
 				log.Warn("rate limiter is disabled", sl.Error(err))
 			} else if !allowed {
-				log.Info("too many requests", slog.String("remote_addr", r.RemoteAddr))
+				log.Info("too many requests", slog.String("remote_addr", ip))
 				response.RenderError(w, r,
 					http.StatusTooManyRequests,
 					"too many requests. try again later")
@@ -61,9 +63,9 @@ func NewAdminAuth(rateLimiter RateLimiter, log *slog.Logger) func(next http.Hand
 			}
 
 			if subtle.ConstantTimeCompare(decodedSecret, adminSecret) == 1 {
-				err := rateLimiter.Reset(r.Context(), rateLimiterFieldName, r.RemoteAddr)
+				err := rateLimiter.Reset(r.Context(), rateLimiterFieldName, ip)
 				if err != nil {
-					log.Warn("failed to reset rate limit", sl.Error(err), slog.String("remote_addr", r.RemoteAddr))
+					log.Warn("failed to reset rate limit", sl.Error(err), slog.String("remote_addr", ip))
 				}
 
 				next.ServeHTTP(w, r)

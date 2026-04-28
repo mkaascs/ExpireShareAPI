@@ -18,25 +18,42 @@ func NewRateLimiter(client *redis.Client, params config.RateLimiterParams) *Rate
 	return &RateLimiter{client: client, params: params}
 }
 
+var allowScript = redis.NewScript(`
+local key = KEYS[1]
+local max = tonumber(ARGV[1])
+local window = tonumber(ARGV[2])
+local block = tonumber(ARGV[3])
+
+local count = redis.call("INCR", key)
+
+if count == 1 then
+    redis.call("EXPIRE", key, window)
+end
+
+if count > max then
+    redis.call("EXPIRE", key, block)
+    return 0
+end
+
+return 1
+`)
+
 func (rl *RateLimiter) Allow(ctx context.Context, field, value string) (bool, error) {
 	const fn = "infrastructure.redis.RateLimiter.Allow"
 	key := fmt.Sprintf("%s:%s:%s", prefix, field, value)
 
-	count, err := rl.client.Incr(ctx, key).Result()
+	result, err := allowScript.Run(ctx, rl.client,
+		[]string{key},
+		rl.params.MaxAttempts,
+		int(rl.params.Window.Seconds()),
+		int(rl.params.BlockDuration.Seconds()),
+	).Int()
+
 	if err != nil {
-		return false, fmt.Errorf("%s: failed to incr key: %w", fn, err)
+		return false, fmt.Errorf("%s: %w", fn, err)
 	}
 
-	if count == 1 {
-		rl.client.Expire(ctx, key, rl.params.Window)
-	}
-
-	if count > int64(rl.params.MaxAttempts) {
-		rl.client.Expire(ctx, key, rl.params.BlockDuration)
-		return false, nil
-	}
-
-	return true, nil
+	return result == 1, nil
 }
 
 func (rl *RateLimiter) Reset(ctx context.Context, field, value string) error {
