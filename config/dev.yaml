@@ -1,5 +1,5 @@
 env: "dev" # prod, local, dev
-db_host: "mysql-expire:3306"
+db_host: "mysql:3306"
 storage:
   type: "local"
   path: "./storage/"
@@ -12,7 +12,7 @@ http_server:
     allowed_credentials: true
     max_age: 86400 # 24h
 redis:
-  addr: "redis-expire:6379"
+  addr: "redis:6379"
   db: 0
   dial_timeout: 10s
   timeout: 5s

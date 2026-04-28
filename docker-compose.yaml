@@ -1,5 +1,5 @@
 services:
-  mysql-expire:
+  mysql:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -12,7 +12,20 @@ services:
       timeout: 5s
       retries: 10
     networks:
-      - shared-network
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - internal
 
   expire-share:
     build: .
@@ -23,13 +36,17 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
       ADMIN_SECRET_BASE64: ${ADMIN_SECRET_BASE64}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     depends_on:
-      mysql-expire:
+      mysql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - ./config:/app/config:ro
       - expire_files:/app/storage
     networks:
+      - internal
       - shared-network
 
 volumes:
@@ -40,3 +57,5 @@ networks:
   shared-network:
     external: true
     name: services-network
+  internal:
+    internal: true
