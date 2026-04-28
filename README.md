@@ -12,22 +12,24 @@ A file sharing service with expiration and download limits. Upload files with op
 - **Access control** — only the file owner can delete or view file info
 - **JWT authentication** — token validation delegated to auth-service via gRPC
 - **Role-based upload limits** — regular users have a configurable upload cap; VIP users get a higher limit
+- **Rate limiting** — per-IP request limiting on sensitive endpoints, backed by Redis
 - **Clean architecture** — domain-driven design with clear separation of handlers, services, and repositories
 
 ---
 
 ## Tech Stack
 
-| Component | Technology                                                            |
+| Component | Technology |
 |-----------|-----------------------------------------------------------------------|
-| **Language** | Go 1.24+                                                              |
-| **HTTP Router** | chi                                                                   |
+| **Language** | Go 1.24+ |
+| **HTTP Router** | chi |
 | **Auth** | JWT via [auth-service](https://github.com/mkaascs/AuthService) (gRPC) |
-| **Database** | MySQL 8.0                                                             |
-| **File Storage** | Local filesystem                                                      |
-| **Logging** | slog (structured JSON/text)                                           |
-| **Migrations** | golang-migrate                                                        |
-| **Documentation** | Swagger (swaggo)                                                      |
+| **Database** | MySQL 8.0 |
+| **Cache / Rate limiting** | Redis 7 |
+| **File Storage** | Local filesystem |
+| **Logging** | slog (structured JSON/text) |
+| **Migrations** | golang-migrate |
+| **Documentation** | Swagger (swaggo) |
 
 ---
 
@@ -46,20 +48,20 @@ Full Swagger documentation available at `/swagger/index.html` when running local
 
 ### Files
 
-| Method | Endpoint | Auth | Description                                         |
+| Method | Endpoint | Auth | Description |
 |--------|----------|------|-----------------------------------------------------|
-| `POST` | `/api/upload` | Required | Upload a file                                       |
+| `POST` | `/api/upload` | Required | Upload a file |
 | `GET` | `/api/file` | Required | Get all user file info (downloads left, expires in) |
-| `GET` | `/api/file/{alias}` | Required | Get file info (downloads left, expires in)          |
-| `DELETE` | `/api/file/{alias}` | Required | Delete a file                                       |
-| `GET` | `/download/{alias}` | — | Download a file                                     |
+| `GET` | `/api/file/{alias}` | Required | Get file info (downloads left, expires in) |
+| `DELETE` | `/api/file/{alias}` | Required | Delete a file |
+| `GET` | `/download/{alias}` | — | Download a file |
 
 ### Admin
 
-| Method | Endpoint                             | Auth | Description           |
+| Method | Endpoint | Auth | Description |
 |--------|--------------------------------------|------|-----------------------|
-| `GET`  | `/api/admin/users`                   | Required | Get all users info    |
-| `GET`  | `/api/admin/users/{id}`              | Required | Get user info by ID   |
+| `GET` | `/api/admin/users` | Required | Get all users info |
+| `GET` | `/api/admin/users/{id}` | Required | Get user info by ID |
 | `POST` | `/api/admin/users/{id}/roles/assign` | Required | Assign a role to user |
 | `POST` | `/api/admin/users/{id}/roles/revoke` | Required | Revoke a role of user |
 
@@ -76,6 +78,40 @@ Password-protected files require the `X-Resource-Password` header on download an
 
 ---
 
+## Rate Limiting
+
+Sensitive endpoints are protected by a Redis-backed rate limiter. Limits are applied per IP address. Exceeding the limit returns `429 Too Many Requests`.
+
+| Endpoint | Limit | Window | Block duration |
+|----------|-------|--------|----------------|
+| `POST /api/auth/register` | 5 requests | 1 hour | 24 hours       |
+| `GET /download/{alias}` | 10 requests | 20 min | 10 min         |
+| `GET /api/admin/*` | 3 requests | 20 min | 30 min         |
+
+The admin rate limiter resets automatically on a successful request — a correct secret never counts toward the limit.
+
+Brute-force protection for `/api/auth/login` (per login, not per IP) is handled on the auth-service side.
+
+Rate limit parameters are fully configurable via the config file:
+
+```yaml
+rate_limiter:
+  admin:
+    max_attempts: 3
+    window: 20m
+    block_duration: 30m
+  register:
+    max_attempts: 5
+    window: 1h
+    block_duration: 24h
+  files:
+    max_attempts: 10
+    window: 15m
+    block_duration: 15m
+```
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -87,10 +123,11 @@ Password-protected files require the `X-Resource-Password` header on download an
 
 ### Environment variables
 
-| Variable | Description              | Required |
+| Variable | Description | Required |
 |----------|--------------------------|----------|
-| `CONFIG_PATH` | Path to config file      | Yes |
-| `MYSQL_ROOT_PASSWORD` | MySQL root password      | Yes |
+| `CONFIG_PATH` | Path to config file | Yes |
+| `MYSQL_ROOT_PASSWORD` | MySQL root password | Yes |
+| `REDIS_PASSWORD` | Redis password | Yes |
 | `CORS_ALLOWED_ORIGINS` | Allowed origins for CORS | Yes |
 | `ADMIN_SECRET_BASE64` | Base64 secret for admins | Yes |
 
@@ -98,7 +135,7 @@ Password-protected files require the `X-Resource-Password` header on download an
 
 ```yaml
 env: "dev" # prod, local, dev
-db_host: "mysql-expire:3306"
+db_host: "mysql:3306"
 storage:
   type: "local"
   path: "./storage/"
@@ -110,6 +147,25 @@ http_server:
   cors:
     allowed_credentials: true
     max_age: 86400 # 24h
+redis:
+  addr: "redis:6379"
+  db: 0
+  dial_timeout: 10s
+  timeout: 5s
+  max_retries: 1
+rate_limiter:
+  admin:
+    max_attempts: 3
+    window: 20m
+    block_duration: 30m
+  register:
+    max_attempts: 5
+    window: 1h
+    block_duration: 24h
+  files:
+    max_attempts: 10
+    window: 20m
+    block_duration: 10m
 service:
   default_ttl: 1h
   default_max_downloads: 1
@@ -122,7 +178,9 @@ auth_service:
   addr: "auth-service:5505"
 
 ```
+
 ---
+
 ## Docker networking
 
 expire-share and auth-service communicate over a shared Docker network `services-network`. auth-service must be started first — it creates the network. expire-share connects to it as an external network.
@@ -131,6 +189,8 @@ expire-share and auth-service communicate over a shared Docker network `services
 auth-service container  ──gRPC──►  expire-share container
      └── services-network (shared)
 ```
+
+Internal services (MySQL, Redis) are isolated in a private network and not reachable outside their compose project.
 
 ---
 
@@ -141,3 +201,5 @@ auth-service container  ──gRPC──►  expire-share container
 - Admin role bypasses all ownership and password checks
 - JWT validation is stateless — delegated entirely to auth-service
 - Token is passed via `Authorization: Bearer <token>` header
+- Admin secret is Base64-encoded and compared using constant-time comparison to prevent timing attacks
+- Rate limiting protects sensitive endpoints from brute-force and abuse
