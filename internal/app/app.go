@@ -24,17 +24,16 @@ import (
 	myMiddleware "expire-share/internal/delivery/middlewares"
 	"expire-share/internal/infrastructure/grpc"
 	repo "expire-share/internal/infrastructure/mysql"
+	rateLimiter "expire-share/internal/infrastructure/redis"
 	"expire-share/internal/infrastructure/storage/local"
 	"expire-share/internal/services/files"
 	"expire-share/internal/services/worker"
-	"log/slog"
-	"net/http"
-
-	"github.com/go-chi/cors"
-
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"log/slog"
+	"net/http"
 )
 
 type App struct {
@@ -107,7 +106,9 @@ func (a *App) MustMountHandlers() {
 		))
 	}
 
-	a.HTTP.Router.Get("/download/{alias}", download.New(fileService, a.logger))
+	a.HTTP.Router.With(myMiddleware.NewRateLimiter(
+		rateLimiter.NewRateLimiter(a.Redis.Client, a.config.RateLimiter.Files), a.logger)).
+		Get("/download/{alias}", download.New(fileService, a.logger))
 
 	a.HTTP.Router.Route("/api", func(r chi.Router) {
 		r.Route("/", func(r chi.Router) {
@@ -125,7 +126,9 @@ func (a *App) MustMountHandlers() {
 		})
 
 		r.Route("/admin", func(r chi.Router) {
-			r.Use(myMiddleware.NewAdminAuth(a.logger))
+			r.Use(myMiddleware.NewAdminAuth(
+				rateLimiter.NewRateLimiter(a.Redis.Client, a.config.RateLimiter.Admin),
+				a.logger))
 
 			r.Route("/users", func(r chi.Router) {
 				r.Get("/{id}", userGet.New(userClient, a.logger))
@@ -146,8 +149,9 @@ func (a *App) MustMountHandlers() {
 				myMiddleware.NewValidator[login.Request](a.logger)).
 				Post("/login", login.New(authClient, a.logger))
 
-			r.With(myMiddleware.NewBodyParser[register.Request](a.config.Service, a.logger),
-				myMiddleware.NewValidator[register.Request](a.logger)).
+			r.With(myMiddleware.NewRateLimiter(rateLimiter.NewRateLimiter(a.Redis.Client, a.config.RateLimiter.Register), a.logger)).
+				With(myMiddleware.NewBodyParser[register.Request](a.config.Service, a.logger),
+					myMiddleware.NewValidator[register.Request](a.logger)).
 				Post("/register", register.New(authClient, a.logger))
 
 			r.With(myMiddleware.NewBodyParser[refresh.Request](a.config.Service, a.logger),

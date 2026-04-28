@@ -11,11 +11,11 @@ const prefix = "rate"
 
 type RateLimiter struct {
 	client *redis.Client
-	cfg    config.RateLimiter
+	params config.RateLimiterParams
 }
 
-func NewRateLimiter(client *redis.Client, cfg config.RateLimiter) *RateLimiter {
-	return &RateLimiter{client: client, cfg: cfg}
+func NewRateLimiter(client *redis.Client, params config.RateLimiterParams) *RateLimiter {
+	return &RateLimiter{client: client, params: params}
 }
 
 func (rl *RateLimiter) Allow(ctx context.Context, field, value string) (bool, error) {
@@ -28,11 +28,11 @@ func (rl *RateLimiter) Allow(ctx context.Context, field, value string) (bool, er
 	}
 
 	if count == 1 {
-		rl.client.Expire(ctx, key, rl.cfg.Window)
+		rl.client.Expire(ctx, key, rl.params.Window)
 	}
 
-	if count > int64(rl.cfg.MaxAttempts) {
-		rl.client.Expire(ctx, key, rl.cfg.BlockDuration)
+	if count > int64(rl.params.MaxAttempts) {
+		rl.client.Expire(ctx, key, rl.params.BlockDuration)
 		return false, nil
 	}
 

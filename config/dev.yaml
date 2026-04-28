@@ -18,9 +18,18 @@ redis:
   timeout: 5s
   max_retries: 1
 rate_limiter:
-  max_attempts: 5
-  window: 20m
-  block_duration: 5m
+  admin:
+    max_attempts: 3
+    window: 20m
+    block_duration: 30m
+  register:
+    max_attempts: 5
+    window: 1h
+    block_duration: 24h
+  files:
+    max_attempts: 10
+    window: 15m
+    block_duration: 15m
 service:
   default_ttl: 1h
   default_max_downloads: 1

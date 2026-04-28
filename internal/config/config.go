@@ -54,10 +54,16 @@ type Redis struct {
 	MaxRetries  int           `yaml:"max_retries" env-default:"1"`
 }
 
-type RateLimiter struct {
+type RateLimiterParams struct {
 	MaxAttempts   int           `yaml:"max_attempts" env-default:"5"`
 	Window        time.Duration `yaml:"window" env-default:"20m"`
-	BlockDuration time.Duration `yaml:"block_duration" env-default:"5m"`
+	BlockDuration time.Duration `yaml:"block_duration" env-default:"15m"`
+}
+
+type RateLimiter struct {
+	Admin    RateLimiterParams `yaml:"admin"`
+	Files    RateLimiterParams `yaml:"files"`
+	Register RateLimiterParams `yaml:"register"`
 }
 
 type CORS struct {
