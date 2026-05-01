@@ -19,14 +19,17 @@ redis:
   max_retries: 1
 rate_limiter:
   admin:
+    field: "admin"
     max_attempts: 3
     window: 20m
     block_duration: 30m
   register:
+    field: "register"
     max_attempts: 5
     window: 1h
-    block_duration: 24h
+    block_duration: 12h
   files:
+    field: "files"
     max_attempts: 10
     window: 20m
     block_duration: 10m

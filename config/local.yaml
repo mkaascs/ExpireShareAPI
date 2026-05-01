@@ -25,7 +25,7 @@ rate_limiter:
     block_duration: 30m
   register:
     field: "register"
-    max_attempts: 10
+    max_attempts: 5
     window: 1h
     block_duration: 12h
   files:
