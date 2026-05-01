@@ -82,14 +82,6 @@ Password-protected files require the `X-Resource-Password` header on download an
 
 Sensitive endpoints are protected by a Redis-backed rate limiter. Limits are applied per IP address. Exceeding the limit returns `429 Too Many Requests`.
 
-| Endpoint | Limit | Window | Block duration |
-|----------|-------|--------|----------------|
-| `POST /api/auth/register` | 5 requests | 1 hour | 24 hours       |
-| `GET /download/{alias}` | 10 requests | 20 min | 10 min         |
-| `GET /api/admin/*` | 3 requests | 20 min | 30 min         |
-
-The admin rate limiter resets automatically on a successful request — a correct secret never counts toward the limit.
-
 Brute-force protection for `/api/auth/login` (per login, not per IP) is handled on the auth-service side.
 
 Rate limit parameters are fully configurable via the config file:
@@ -97,17 +89,20 @@ Rate limit parameters are fully configurable via the config file:
 ```yaml
 rate_limiter:
   admin:
+    field: "admin"
     max_attempts: 3
     window: 20m
     block_duration: 30m
   register:
+    field: "register"
     max_attempts: 5
     window: 1h
-    block_duration: 24h
+    block_duration: 12h
   files:
+    field: "files"
     max_attempts: 10
-    window: 15m
-    block_duration: 15m
+    window: 20m
+    block_duration: 10m
 ```
 
 ---
@@ -155,14 +150,17 @@ redis:
   max_retries: 1
 rate_limiter:
   admin:
+    field: "admin"
     max_attempts: 3
     window: 20m
     block_duration: 30m
   register:
+    field: "register"
     max_attempts: 5
     window: 1h
-    block_duration: 24h
+    block_duration: 12h
   files:
+    field: "files"
     max_attempts: 10
     window: 20m
     block_duration: 10m
@@ -176,6 +174,7 @@ service:
     max_uploaded_files_for_user: 1
 auth_service:
   addr: "auth-service:5505"
+
 
 ```
 
