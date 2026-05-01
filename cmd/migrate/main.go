@@ -44,7 +44,7 @@ func main() {
 
 	operations := map[string]func() error{
 		"up":   mgr.Up,
-		"down": mgr.Down,
+		"down": func() error { return mgr.Steps(-1) },
 	}
 
 	fn, ok := operations[cmd]

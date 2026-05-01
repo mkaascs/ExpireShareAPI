@@ -28,7 +28,7 @@ tasks:
     cmds:
       - go run ./cmd/migrate/main.go up
   migrate:down:
-    desc: "Down db migrations"
+    desc: "Down a db migration"
     cmds:
       - go run ./cmd/migrate/main.go down
   docs:swagger:
