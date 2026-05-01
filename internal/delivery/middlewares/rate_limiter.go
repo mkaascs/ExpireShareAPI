@@ -10,16 +10,9 @@ import (
 )
 
 type RateLimiter interface {
-	Allow(ctx context.Context, field, value string) (bool, error)
-	Reset(ctx context.Context, field, value string) error
+	Allow(ctx context.Context, value string) (bool, error)
+	Reset(ctx context.Context, value string) error
 }
-
-type RateLimiterParams struct {
-	Field string
-	Value string
-}
-
-const fieldName = "ip"
 
 func NewRateLimiter(limiter RateLimiter, log *slog.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -35,7 +28,7 @@ func NewRateLimiter(limiter RateLimiter, log *slog.Logger) func(next http.Handle
 				return
 			}
 
-			allowed, err := limiter.Allow(r.Context(), fieldName, ip)
+			allowed, err := limiter.Allow(r.Context(), ip)
 
 			if err != nil {
 				log.Warn("rate limiter is disabled", sl.Error(err))

@@ -11,8 +11,6 @@ import (
 	"os"
 )
 
-const rateLimiterFieldName = "admin:ip"
-
 func NewAdminAuth(rateLimiter RateLimiter, log *slog.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		log := log.With(slog.String("component", "middleware/admin"))
@@ -33,7 +31,7 @@ func NewAdminAuth(rateLimiter RateLimiter, log *slog.Logger) func(next http.Hand
 				return
 			}
 
-			allowed, err := rateLimiter.Allow(r.Context(), rateLimiterFieldName, ip)
+			allowed, err := rateLimiter.Allow(r.Context(), ip)
 			if err != nil {
 				log.Warn("rate limiter is disabled", sl.Error(err))
 			} else if !allowed {
@@ -63,7 +61,7 @@ func NewAdminAuth(rateLimiter RateLimiter, log *slog.Logger) func(next http.Hand
 			}
 
 			if subtle.ConstantTimeCompare(decodedSecret, adminSecret) == 1 {
-				err := rateLimiter.Reset(r.Context(), rateLimiterFieldName, ip)
+				err := rateLimiter.Reset(r.Context(), ip)
 				if err != nil {
 					log.Warn("failed to reset rate limit", sl.Error(err), slog.String("remote_addr", ip))
 				}

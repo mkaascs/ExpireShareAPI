@@ -38,9 +38,9 @@ end
 return 1
 `)
 
-func (rl *RateLimiter) Allow(ctx context.Context, field, value string) (bool, error) {
+func (rl *RateLimiter) Allow(ctx context.Context, value string) (bool, error) {
 	const fn = "infrastructure.redis.RateLimiter.Allow"
-	key := fmt.Sprintf("%s:%s:%s", prefix, field, value)
+	key := fmt.Sprintf("%s:%s:%s", prefix, rl.params.Field, value)
 
 	result, err := allowScript.Run(ctx, rl.client,
 		[]string{key},
@@ -56,9 +56,9 @@ func (rl *RateLimiter) Allow(ctx context.Context, field, value string) (bool, er
 	return result == 1, nil
 }
 
-func (rl *RateLimiter) Reset(ctx context.Context, field, value string) error {
+func (rl *RateLimiter) Reset(ctx context.Context, value string) error {
 	const fn = "infrastructure.redis.RateLimiter.Reset"
-	key := fmt.Sprintf("%s:%s:%s", prefix, field, value)
+	key := fmt.Sprintf("%s:%s:%s", prefix, rl.params.Field, value)
 
 	if _, err := rl.client.Del(ctx, key).Result(); err != nil {
 		return fmt.Errorf("%s: failed to del key: %w", fn, err)
