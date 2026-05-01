@@ -55,6 +55,7 @@ type Redis struct {
 }
 
 type RateLimiterParams struct {
+	Field         string        `yaml:"field" env-default:""`
 	MaxAttempts   int           `yaml:"max_attempts" env-default:"5"`
 	Window        time.Duration `yaml:"window" env-default:"20m"`
 	BlockDuration time.Duration `yaml:"block_duration" env-default:"15m"`
