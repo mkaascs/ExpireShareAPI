@@ -32,10 +32,8 @@ type Config struct {
 }
 
 type Storage struct {
-	Type               string `yaml:"type" env-default:"local"`
-	Path               string `yaml:"path" env-required:"true"`
-	MaxFileSize        string `yaml:"max_file_size" env-default:"100mb"`
-	MaxFileSizeInBytes int64
+	Type string `yaml:"type" env-default:"local"`
+	Path string `yaml:"path" env-required:"true"`
 }
 
 type HttpServer struct {
@@ -87,8 +85,11 @@ type Service struct {
 }
 
 type Permissions struct {
-	MaxUploadedFileForVip  int `yaml:"max_uploaded_file_for_vip" env-default:"10"`
-	MaxUploadedFileForUser int `yaml:"max_uploaded_file_for_user" env-default:"1"`
+	MaxFilesSizeForUser        string `yaml:"max_files_size_for_user" env-default:"500mb"`
+	MaxFilesSizeForVip         string `yaml:"max_files_size_for_vip" env-default:"2gb"`
+	MaxUploadedFiles           int    `yaml:"max_uploaded_files" env-default:"50"`
+	MaxFilesSizeForUserInBytes int64
+	MaxFilesSizeForVipInBytes  int64
 }
 
 func MustLoad() *Config {
@@ -124,16 +125,33 @@ func Load() (*Config, error) {
 
 	cfg.AllowedOrigins = origins
 
-	bytes, err := sizes.ToBytes(cfg.MaxFileSize)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse max file size in config: %w", err)
+	if err := setPermissionsConfig(&cfg); err != nil {
+		return nil, err
 	}
 
-	cfg.MaxFileSizeInBytes = bytes
 	cfg.DbConnectionString = fmt.Sprintf(
 		"root:%s@tcp(%s)/ExpireShare?charset=utf8&parseTime=True",
 		cfg.DbPassword,
 		cfg.DbHost)
 
 	return &cfg, nil
+}
+
+func setPermissionsConfig(cfg *Config) error {
+	const errMsg = "failed to parse max file size in config"
+
+	bytes, err := sizes.ToBytes(cfg.MaxFilesSizeForUser)
+	if err != nil {
+		return fmt.Errorf("%s: %w", errMsg, err)
+	}
+
+	cfg.MaxFilesSizeForUserInBytes = bytes
+
+	bytes, err = sizes.ToBytes(cfg.MaxFilesSizeForVip)
+	if err != nil {
+		return fmt.Errorf("%s: %w", errMsg, err)
+	}
+
+	cfg.MaxFilesSizeForVipInBytes = bytes
+	return nil
 }
