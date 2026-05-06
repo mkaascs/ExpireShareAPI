@@ -27,7 +27,7 @@ func (fs *Service) UploadFile(ctx context.Context, command commands.UploadFile) 
 		return "", fmt.Errorf("%s: %s: %w", fn, msg, err)
 	}
 
-	err = fs.checkUploadQuote(filesCount, command.FileSize, command.Roles)
+	err = fs.checkUploadQuote(filesCount, command.Filesize, command.Roles)
 	if err != nil {
 		log.Info("access denied", sl.Error(err), slog.Int64("user_id", command.UserID))
 		return "", fmt.Errorf("%s: failed to upload quote: %w", fn, err)

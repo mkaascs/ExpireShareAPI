@@ -37,7 +37,7 @@ func TestService_UploadFile(t *testing.T) {
 
 	command := commands.UploadFile{
 		File:         io.NopCloser(strings.NewReader("file content")),
-		FileSize:     12,
+		Filesize:     12,
 		Filename:     "test.txt",
 		Password:     "",
 		MaxDownloads: 5,

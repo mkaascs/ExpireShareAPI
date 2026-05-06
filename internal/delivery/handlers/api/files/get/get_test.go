@@ -38,6 +38,7 @@ func TestHandler_Get(t *testing.T) {
 				return &results.GetFile{
 					DownloadsLeft: 3,
 					ExpiresIn:     2 * time.Hour,
+					Filesize:      512,
 				}, nil
 			})
 
@@ -50,6 +51,7 @@ func TestHandler_Get(t *testing.T) {
 		var resp Response
 		require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
 		require.Equal(t, int16(3), resp.DownloadsLeft)
+		require.Equal(t, int64(512), resp.Filesize)
 		require.NotEmpty(t, resp.ExpiresIn)
 	})
 

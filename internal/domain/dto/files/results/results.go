@@ -15,6 +15,7 @@ type DownloadFile struct {
 type GetFile struct {
 	Alias         string
 	Filename      string
+	Filesize      int64
 	DownloadsLeft int16
 	ExpiresIn     time.Duration
 }

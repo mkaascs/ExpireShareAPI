@@ -27,10 +27,12 @@ func TestHandler_GetAll(t *testing.T) {
 		{
 			DownloadsLeft: 3,
 			ExpiresIn:     time.Hour,
+			Filesize:      int64(512),
 		},
 		{
 			DownloadsLeft: 5,
 			ExpiresIn:     time.Minute,
+			Filesize:      int64(1 << 10),
 		},
 	}
 

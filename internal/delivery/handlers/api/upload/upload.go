@@ -107,7 +107,7 @@ func New(uploader FileUploader, log *slog.Logger, cfg config.Config) http.Handle
 
 		alias, err := uploader.UploadFile(r.Context(), commands.UploadFile{
 			File:         file,
-			FileSize:     header.Size,
+			Filesize:     header.Size,
 			Filename:     header.Filename,
 			Password:     request.Password,
 			MaxDownloads: request.MaxDownloads,

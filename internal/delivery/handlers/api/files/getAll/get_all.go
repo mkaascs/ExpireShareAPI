@@ -18,6 +18,7 @@ import (
 type GetFile struct {
 	Alias         string `json:"alias"`
 	Filename      string `json:"filename"`
+	Filesize      int64  `json:"filesize"`
 	DownloadsLeft int16  `json:"downloads_left"`
 	ExpiresIn     string `json:"expires_at"`
 }
@@ -88,6 +89,7 @@ func New(getter AllFilesGetter, log *slog.Logger) http.HandlerFunc {
 			result.Files = append(result.Files, GetFile{
 				Alias:         file.Alias,
 				Filename:      file.Filename,
+				Filesize:      file.Filesize,
 				DownloadsLeft: file.DownloadsLeft,
 				ExpiresIn:     util.TimeString(file.ExpiresIn),
 			})

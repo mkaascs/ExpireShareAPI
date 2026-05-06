@@ -22,6 +22,7 @@ import (
 type Response struct {
 	response.Response
 	Filename      string `json:"filename"`
+	Filesize      int64  `json:"filesize"`
 	DownloadsLeft int16  `json:"downloads_left,omitempty"`
 	ExpiresIn     string `json:"expires_in,omitempty"`
 }
@@ -88,6 +89,7 @@ func New(getter FileGetter, log *slog.Logger) http.HandlerFunc {
 		render.Status(r, http.StatusOK)
 		render.JSON(w, r, Response{
 			Filename:      file.Filename,
+			Filesize:      file.Filesize,
 			DownloadsLeft: file.DownloadsLeft,
 			ExpiresIn:     util.TimeString(file.ExpiresIn),
 		})

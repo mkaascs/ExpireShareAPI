@@ -13,7 +13,7 @@ type RequestingUserInfo struct {
 
 type UploadFile struct {
 	File         io.Reader
-	FileSize     int64
+	Filesize     int64
 	Filename     string
 	MaxDownloads int16
 	Password     string
