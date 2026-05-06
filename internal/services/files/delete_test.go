@@ -10,6 +10,7 @@ import (
 	"expire-share/internal/domain/interfaces/tx"
 	"expire-share/internal/mocks"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
 	"log/slog"
@@ -39,7 +40,7 @@ func TestService_DeleteFile(t *testing.T) {
 
 		mockFileRepo.EXPECT().GetFileByAlias(gomock.Any(), gomock.Any()).
 			DoAndReturn(func(_ context.Context, alias string) (*entities.File, error) {
-				require.Equal(t, command.Alias, alias)
+				assert.Equal(t, command.Alias, alias)
 				return &entities.File{
 					Alias:        command.Alias,
 					PasswordHash: "",
@@ -51,13 +52,13 @@ func TestService_DeleteFile(t *testing.T) {
 
 		mockFileRepo.EXPECT().DeleteFileTx(gomock.Any(), mockTx, gomock.Any()).
 			DoAndReturn(func(_ context.Context, tx tx.Tx, alias string) error {
-				require.Equal(t, command.Alias, alias)
+				assert.Equal(t, command.Alias, alias)
 				return nil
 			})
 
 		mockFileStorage.EXPECT().Delete(gomock.Any(), gomock.Any()).
 			DoAndReturn(func(_ context.Context, alias string) error {
-				require.Equal(t, command.Alias, alias)
+				assert.Equal(t, command.Alias, alias)
 				return nil
 			})
 

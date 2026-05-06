@@ -8,6 +8,7 @@ import (
 	"expire-share/internal/domain/entities"
 	"expire-share/internal/mocks"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
 	"log/slog"
@@ -53,7 +54,7 @@ func TestService_GetAllFiles(t *testing.T) {
 
 		mockFileRepo.EXPECT().GetFilesByUserID(gomock.Any(), gomock.Any()).
 			DoAndReturn(func(_ context.Context, userID int64) ([]entities.File, error) {
-				require.Equal(t, command.UserID, userID)
+				assert.Equal(t, command.UserID, userID)
 				return files, nil
 			})
 

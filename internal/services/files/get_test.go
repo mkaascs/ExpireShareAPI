@@ -10,6 +10,7 @@ import (
 	"expire-share/internal/mocks"
 	"expire-share/internal/testutil"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
 	"log/slog"
@@ -39,7 +40,7 @@ func TestService_GetFileByAlias(t *testing.T) {
 
 		mockFileRepo.EXPECT().GetFileByAlias(gomock.Any(), command.Alias).
 			DoAndReturn(func(_ context.Context, alias string) (*entities.File, error) {
-				require.Equal(t, command.Alias, alias)
+				assert.Equal(t, command.Alias, alias)
 				return &entities.File{
 					Name:          "file.txt",
 					Alias:         command.Alias,
