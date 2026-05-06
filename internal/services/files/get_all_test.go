@@ -33,12 +33,14 @@ func TestService_GetAllFiles(t *testing.T) {
 			Alias:         "file-alias1",
 			DownloadsLeft: 5,
 			ExpiresAt:     time.Now().Add(time.Hour),
+			Filesize:      int64(2 << 10),
 		},
 		{
 			Filename:      "file.pdf",
 			Alias:         "file-alias2",
 			DownloadsLeft: 1,
 			ExpiresAt:     time.Now().Add(time.Minute),
+			Filesize:      int64(2 << 42),
 		},
 	}
 

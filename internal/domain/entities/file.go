@@ -4,6 +4,7 @@ import "time"
 
 type File struct {
 	Filename      string
+	Filesize      int64
 	Alias         string
 	DownloadsLeft int16
 	PasswordHash  string

@@ -47,6 +47,7 @@ func TestService_GetFileByAlias(t *testing.T) {
 					UserID:        command.UserID,
 					DownloadsLeft: 5,
 					ExpiresAt:     time.Now().Add(2 * time.Hour),
+					Filesize:      int64(2 << 10),
 				}, nil
 			})
 
@@ -57,6 +58,7 @@ func TestService_GetFileByAlias(t *testing.T) {
 		require.Equal(t, "file.txt", result.Filename)
 		require.Equal(t, command.Alias, result.Alias)
 		require.Equal(t, int16(5), result.DownloadsLeft)
+		require.Equal(t, int64(2<<10), result.Filesize)
 		require.Positive(t, result.ExpiresIn)
 	})
 
