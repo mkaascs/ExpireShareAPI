@@ -42,6 +42,7 @@ type DeleteFile struct {
 
 type AddFile struct {
 	Filename     string
+	Filesize     int64
 	Alias        string
 	MaxDownloads int16
 	PasswordHash string

@@ -61,6 +61,7 @@ func (fs *Service) UploadFile(ctx context.Context, command commands.UploadFile) 
 
 	_, err = fs.fileRepo.AddFileTx(ctx, tx, commands.AddFile{
 		Filename:     command.Filename,
+		Filesize:     command.Filesize,
 		Alias:        genAlias,
 		MaxDownloads: command.MaxDownloads,
 		TTL:          command.TTL,

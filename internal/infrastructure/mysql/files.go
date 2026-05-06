@@ -43,8 +43,9 @@ func (fr *FileRepo) AddFileTx(ctx context.Context, tx tx.Tx, command commands.Ad
 	}
 
 	currentTime := time.Now()
-	res, err := sqlTx.ExecContext(ctx, `INSERT INTO files(file_name, alias, downloads_left, loaded_at, expires_at, password_hash, user_id) VALUES(?, ?, ?, ?, ?, ?, ?)`,
+	res, err := sqlTx.ExecContext(ctx, `INSERT INTO files(file_name, file_size, alias, downloads_left, loaded_at, expires_at, password_hash, user_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`,
 		command.Filename,
+		command.Filesize,
 		command.Alias,
 		command.MaxDownloads,
 		currentTime,
@@ -73,8 +74,9 @@ func (fr *FileRepo) GetFileByAlias(ctx context.Context, alias string) (*entities
 	const fn = "repository.mysql.FileRepo.GetFileByAlias"
 
 	var file entities.File
-	err := fr.DB.QueryRowContext(ctx, `SELECT file_name, alias, downloads_left, loaded_at, expires_at, password_hash, user_id FROM files WHERE alias = ? AND expires_at > NOW()`, alias).Scan(
+	err := fr.DB.QueryRowContext(ctx, `SELECT file_name, file_size, alias, downloads_left, loaded_at, expires_at, password_hash, user_id FROM files WHERE alias = ? AND expires_at > NOW()`, alias).Scan(
 		&file.Name,
+		&file.Size,
 		&file.Alias,
 		&file.DownloadsLeft,
 		&file.LoadedAt,
@@ -97,7 +99,7 @@ func (fr *FileRepo) GetFilesByUserID(ctx context.Context, userID int64) ([]entit
 	const fn = "repository.mysql.FileRepo.GetFilesByUserID"
 	log := fr.log.With(slog.String("fn", fn))
 
-	rows, err := fr.DB.QueryContext(ctx, `SELECT file_name, alias, downloads_left, loaded_at, expires_at, password_hash, user_id FROM files WHERE user_id = ? AND expires_at > NOW()`, userID)
+	rows, err := fr.DB.QueryContext(ctx, `SELECT file_name, file_size, alias, downloads_left, loaded_at, expires_at, password_hash, user_id FROM files WHERE user_id = ? AND expires_at > NOW()`, userID)
 	if err != nil {
 		return nil, fmt.Errorf("%s: failed to query sql: %w", fn, err)
 	}
@@ -113,6 +115,7 @@ func (fr *FileRepo) GetFilesByUserID(ctx context.Context, userID int64) ([]entit
 	for rows.Next() {
 		var file entities.File
 		if err := rows.Scan(&file.Name,
+			&file.Size,
 			&file.Alias,
 			&file.DownloadsLeft,
 			&file.LoadedAt,
@@ -132,18 +135,18 @@ func (fr *FileRepo) GetFilesByUserID(ctx context.Context, userID int64) ([]entit
 	return files, nil
 }
 
-func (fr *FileRepo) CountByUserID(ctx context.Context, userId int64) (int, error) {
-	const fn = "repository.mysql.FileRepo.CountByUserId"
+func (fr *FileRepo) GetFilesStatByUserID(ctx context.Context, userId int64) (*entities.FilesStat, error) {
+	const fn = "repository.mysql.FileRepo.GetFilesStatByUserID"
 
-	var count int
-	err := fr.DB.QueryRowContext(ctx, `SELECT count(*) FROM files WHERE user_id = ?`, userId).
-		Scan(&count)
+	stat := entities.FilesStat{UserID: userId}
+	err := fr.DB.QueryRowContext(ctx, `SELECT COUNT(*), COALESCE(SUM(file_size), 0) FROM files WHERE user_id = ?`, userId).
+		Scan(&stat.Count, &stat.Size)
 
 	if err != nil {
-		return 0, fmt.Errorf("%s: failed to query sql: %w", fn, err)
+		return nil, fmt.Errorf("%s: failed to query sql: %w", fn, err)
 	}
 
-	return count, nil
+	return &stat, nil
 }
 
 func (fr *FileRepo) DecrementDownloadsByAliasTx(ctx context.Context, tx tx.Tx, alias string) (int16, error) {
