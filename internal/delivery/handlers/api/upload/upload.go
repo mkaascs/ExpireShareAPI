@@ -72,7 +72,7 @@ func New(uploader FileUploader, log *slog.Logger, cfg config.Config) http.Handle
 			return
 		}
 
-		err = r.ParseMultipartForm(cfg.MaxFileSizeInBytes)
+		err = r.ParseMultipartForm(cfg.MaxFilesSizeForVipInBytes)
 		if err != nil {
 			log.Info("failed to parse form", sl.Error(err))
 			response.RenderError(w, r,

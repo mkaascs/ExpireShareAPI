@@ -26,10 +26,10 @@ import (
 
 func TestHandler_Upload(t *testing.T) {
 	testCfg := config.Config{
-		Storage: config.Storage{
-			MaxFileSizeInBytes: 10 * 1024 * 1024,
-		},
 		Service: config.Service{
+			Permissions: config.Permissions{
+				MaxFilesSizeForVipInBytes: 2 << 32,
+			},
 			MaxDownloads: 5,
 			DefaultTtl:   2 * time.Hour,
 		},
