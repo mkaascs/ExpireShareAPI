@@ -32,7 +32,7 @@ func (fs *Service) checkUploadQuote(stat entities.FilesStat, filesize int64, rol
 		return domainErrors.ErrUploadLimitExceeded
 	}
 
-	return domainErrors.ErrUploadLimitExceeded
+	return nil
 }
 
 func (fs *Service) checkOwner(fileInfo entities.File, userID int64) error {

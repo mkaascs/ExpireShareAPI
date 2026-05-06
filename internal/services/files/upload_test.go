@@ -10,6 +10,7 @@ import (
 	"expire-share/internal/domain/interfaces/tx"
 	"expire-share/internal/mocks"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
 	"log/slog"
@@ -22,15 +23,12 @@ func TestService_UploadFile(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 
 	cfg := config.Config{
-		Storage: config.Storage{
-			MaxFileSizeInBytes: 10 * 1024 * 1024,
-		},
-
 		Service: config.Service{
 			AliasLength: 6,
 			Permissions: config.Permissions{
-				MaxUploadedFileForUser: 1,
-				MaxUploadedFileForVip:  10,
+				MaxFilesSizeForVipInBytes:  2 << 31,
+				MaxFilesSizeForUserInBytes: 2 << 29,
+				MaxUploadedFiles:           50,
 			},
 		},
 	}
@@ -56,17 +54,24 @@ func TestService_UploadFile(t *testing.T) {
 		mockFileRepo := mocks.NewMockFileRepo(ctrl)
 		mockFileStorage := mocks.NewMockFile(ctrl)
 
-		mockFileRepo.EXPECT().CountByUserID(gomock.Any(), command.UserID).
-			Return(0, nil)
+		mockFileRepo.EXPECT().GetFilesStatByUserID(gomock.Any(), command.UserID).
+			DoAndReturn(func(_ context.Context, userID int64) (*entities.FilesStat, error) {
+				assert.Equal(t, command.UserID, userID)
+				return &entities.FilesStat{
+					UserID: command.UserID,
+					Size:   2 << 12,
+					Count:  12,
+				}, nil
+			})
 
 		mockFileRepo.EXPECT().BeginTx(gomock.Any()).Return(mockTx, nil)
 
 		mockFileRepo.EXPECT().AddFileTx(gomock.Any(), mockTx, gomock.Any()).
 			DoAndReturn(func(_ context.Context, _ tx.Tx, cmd commands.AddFile) (*entities.File, error) {
-				require.Equal(t, command.Filename, cmd.Filename)
-				require.Equal(t, command.MaxDownloads, cmd.MaxDownloads)
-				require.Empty(t, cmd.PasswordHash)
-				require.NotEmpty(t, cmd.Alias)
+				assert.Equal(t, command.Filename, cmd.Filename)
+				assert.Equal(t, command.MaxDownloads, cmd.MaxDownloads)
+				assert.Empty(t, cmd.PasswordHash)
+				assert.NotEmpty(t, cmd.Alias)
 				return &entities.File{Alias: cmd.Alias}, nil
 			})
 
@@ -89,15 +94,22 @@ func TestService_UploadFile(t *testing.T) {
 		mockFileRepo := mocks.NewMockFileRepo(ctrl)
 		mockFileStorage := mocks.NewMockFile(ctrl)
 
-		mockFileRepo.EXPECT().CountByUserID(gomock.Any(), command.UserID).
-			Return(0, nil)
+		mockFileRepo.EXPECT().GetFilesStatByUserID(gomock.Any(), command.UserID).
+			DoAndReturn(func(_ context.Context, userID int64) (*entities.FilesStat, error) {
+				assert.Equal(t, command.UserID, userID)
+				return &entities.FilesStat{
+					UserID: command.UserID,
+					Size:   2 << 12,
+					Count:  12,
+				}, nil
+			})
 
 		mockFileRepo.EXPECT().BeginTx(gomock.Any()).Return(mockTx, nil)
 
 		mockFileRepo.EXPECT().AddFileTx(gomock.Any(), mockTx, gomock.Any()).
 			DoAndReturn(func(_ context.Context, _ tx.Tx, cmd commands.AddFile) (*entities.File, error) {
-				require.NotEmpty(t, cmd.PasswordHash)
-				require.Contains(t, cmd.PasswordHash, "$2a$")
+				assert.NotEmpty(t, cmd.PasswordHash)
+				assert.Contains(t, cmd.PasswordHash, "$2a$")
 				return &entities.File{Alias: cmd.Alias}, nil
 			})
 
@@ -107,66 +119,76 @@ func TestService_UploadFile(t *testing.T) {
 		mockTx.EXPECT().Commit().Return(nil)
 
 		fileService := New(mockFileRepo, mockFileStorage, log, cfg)
-		alias, err := fileService.UploadFile(context.Background(), commands.UploadFile{
-			File:         io.NopCloser(strings.NewReader("content")),
-			Filename:     "secret.txt",
-			Password:     "file-password",
-			MaxDownloads: 1,
-			TTL:          time.Hour,
-			RequestingUserInfo: commands.RequestingUserInfo{
-				UserID: int64(1),
-				Roles:  []entities.UserRole{entities.RoleUser},
-			},
-		})
+
+		commandWithPsw := command
+		commandWithPsw.Password = "123456"
+
+		alias, err := fileService.UploadFile(context.Background(), commandWithPsw)
 		require.NoError(t, err)
 		require.NotEmpty(t, alias)
 	})
 
-	t.Run("success vip user exceeds regular limit", func(t *testing.T) {
+	t.Run("upload filesize limit exceeded for vip", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		mockTx := mocks.NewMockTx(ctrl)
 		mockFileRepo := mocks.NewMockFileRepo(ctrl)
 		mockFileStorage := mocks.NewMockFile(ctrl)
 
-		mockFileRepo.EXPECT().CountByUserID(gomock.Any(), gomock.Any()).
-			Return(5, nil)
-
-		mockFileRepo.EXPECT().BeginTx(gomock.Any()).Return(mockTx, nil)
-		mockFileRepo.EXPECT().AddFileTx(gomock.Any(), mockTx, gomock.Any()).
-			Return(int64(1), nil)
-
-		mockFileStorage.EXPECT().Upload(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(nil)
-
-		mockTx.EXPECT().Commit().Return(nil)
+		mockFileRepo.EXPECT().GetFilesStatByUserID(gomock.Any(), gomock.Any()).
+			Return(&entities.FilesStat{
+				UserID: command.UserID,
+				Size:   2 << 30,
+			}, nil)
 
 		fileService := New(mockFileRepo, mockFileStorage, log, cfg)
-		alias, err := fileService.UploadFile(context.Background(), commands.UploadFile{
-			File:         io.NopCloser(strings.NewReader("content")),
-			Filename:     "file.txt",
-			MaxDownloads: 1,
-			TTL:          time.Hour,
-			RequestingUserInfo: commands.RequestingUserInfo{
-				UserID: int64(1),
-				Roles:  []entities.UserRole{entities.RoleVip},
-			},
-		})
 
-		require.NoError(t, err)
-		require.NotEmpty(t, alias)
+		vipCommand := command
+		vipCommand.Filesize = 2 << 31
+		vipCommand.Roles = []entities.UserRole{entities.RoleVip}
+
+		alias, err := fileService.UploadFile(context.Background(), vipCommand)
+
+		require.Empty(t, alias)
+		require.ErrorIs(t, err, domainErrors.ErrFileSizeTooBig)
 	})
 
-	t.Run("upload limit exceeded for regular user", func(t *testing.T) {
+	t.Run("upload filesize limit exceeded for regular user", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		mockFileRepo := mocks.NewMockFileRepo(ctrl)
 		mockFileStorage := mocks.NewMockFile(ctrl)
 
-		mockFileRepo.EXPECT().CountByUserID(gomock.Any(), command.UserID).
-			Return(1, nil)
+		mockFileRepo.EXPECT().GetFilesStatByUserID(gomock.Any(), command.UserID).
+			Return(&entities.FilesStat{
+				UserID: command.UserID,
+				Size:   2 << 28,
+			}, nil)
+
+		userCommand := command
+		userCommand.Filesize = 2 << 29
+		userCommand.Roles = []entities.UserRole{entities.RoleUser}
+
+		fileService := New(mockFileRepo, mockFileStorage, log, cfg)
+		alias, err := fileService.UploadFile(context.Background(), userCommand)
+		require.Empty(t, alias)
+		require.ErrorIs(t, err, domainErrors.ErrFileSizeTooBig)
+	})
+
+	t.Run("upload limit exceeded", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockFileRepo := mocks.NewMockFileRepo(ctrl)
+		mockFileStorage := mocks.NewMockFile(ctrl)
+
+		mockFileRepo.EXPECT().GetFilesStatByUserID(gomock.Any(), command.UserID).
+			Return(&entities.FilesStat{
+				UserID: command.UserID,
+				Size:   2 << 12,
+				Count:  cfg.MaxUploadedFiles,
+			}, nil)
 
 		fileService := New(mockFileRepo, mockFileStorage, log, cfg)
 		alias, err := fileService.UploadFile(context.Background(), command)
@@ -182,8 +204,8 @@ func TestService_UploadFile(t *testing.T) {
 		mockFileRepo := mocks.NewMockFileRepo(ctrl)
 		mockFileStorage := mocks.NewMockFile(ctrl)
 
-		mockFileRepo.EXPECT().CountByUserID(gomock.Any(), command.UserID).
-			Return(0, nil)
+		mockFileRepo.EXPECT().GetFilesStatByUserID(gomock.Any(), command.UserID).
+			Return(&entities.FilesStat{}, nil)
 
 		mockFileRepo.EXPECT().BeginTx(gomock.Any()).Return(mockTx, nil)
 
@@ -211,8 +233,8 @@ func TestService_UploadFile(t *testing.T) {
 
 		ctx, cancel := context.WithCancel(context.Background())
 
-		mockFileRepo.EXPECT().CountByUserID(gomock.Any(), command.UserID).
-			Return(0, nil)
+		mockFileRepo.EXPECT().GetFilesStatByUserID(gomock.Any(), command.UserID).
+			Return(&entities.FilesStat{}, nil)
 
 		mockFileRepo.EXPECT().BeginTx(gomock.Any()).Return(mockTx, nil)
 
@@ -230,15 +252,15 @@ func TestService_UploadFile(t *testing.T) {
 		require.ErrorIs(t, err, context.Canceled)
 	})
 
-	t.Run("internal error on count", func(t *testing.T) {
+	t.Run("internal error on get files stat", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		mockFileRepo := mocks.NewMockFileRepo(ctrl)
 		mockFileStorage := mocks.NewMockFile(ctrl)
 
-		mockFileRepo.EXPECT().CountByUserID(gomock.Any(), command.UserID).
-			Return(0, errors.New("internal error"))
+		mockFileRepo.EXPECT().GetFilesStatByUserID(gomock.Any(), command.UserID).
+			Return(nil, errors.New("internal error"))
 
 		fileService := New(mockFileRepo, mockFileStorage, log, cfg)
 		alias, err := fileService.UploadFile(context.Background(), command)

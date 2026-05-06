@@ -67,21 +67,6 @@ func (mr *MockFileRepoMockRecorder) BeginTx(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeginTx", reflect.TypeOf((*MockFileRepo)(nil).BeginTx), ctx)
 }
 
-// CountByUserID mocks base method.
-func (m *MockFileRepo) CountByUserID(ctx context.Context, userID int64) (int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountByUserID", ctx, userID)
-	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CountByUserID indicates an expected call of CountByUserID.
-func (mr *MockFileRepoMockRecorder) CountByUserID(ctx, userID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountByUserID", reflect.TypeOf((*MockFileRepo)(nil).CountByUserID), ctx, userID)
-}
-
 // DecrementDownloadsByAliasTx mocks base method.
 func (m *MockFileRepo) DecrementDownloadsByAliasTx(ctx context.Context, tx tx.Tx, alias string) (int16, error) {
 	m.ctrl.T.Helper()
@@ -154,4 +139,19 @@ func (m *MockFileRepo) GetFilesByUserID(ctx context.Context, userID int64) ([]en
 func (mr *MockFileRepoMockRecorder) GetFilesByUserID(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilesByUserID", reflect.TypeOf((*MockFileRepo)(nil).GetFilesByUserID), ctx, userID)
+}
+
+// GetFilesStatByUserID mocks base method.
+func (m *MockFileRepo) GetFilesStatByUserID(ctx context.Context, userID int64) (*entities.FilesStat, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFilesStatByUserID", ctx, userID)
+	ret0, _ := ret[0].(*entities.FilesStat)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFilesStatByUserID indicates an expected call of GetFilesStatByUserID.
+func (mr *MockFileRepoMockRecorder) GetFilesStatByUserID(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFilesStatByUserID", reflect.TypeOf((*MockFileRepo)(nil).GetFilesStatByUserID), ctx, userID)
 }

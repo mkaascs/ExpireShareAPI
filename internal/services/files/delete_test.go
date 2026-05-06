@@ -19,18 +19,7 @@ import (
 func TestService_DeleteFile(t *testing.T) {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	cfg := config.Config{
-		Storage: config.Storage{
-			MaxFileSizeInBytes: 10 * 1024 * 1024,
-		},
-
-		Service: config.Service{
-			Permissions: config.Permissions{
-				MaxUploadedFileForUser: 1,
-				MaxUploadedFileForVip:  10,
-			},
-		},
-	}
+	cfg := config.Config{}
 
 	command := commands.DeleteFile{
 		Alias: "file-alias",
