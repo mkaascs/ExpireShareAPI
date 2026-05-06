@@ -26,7 +26,7 @@ func Load(environment string) (*slog.Logger, error) {
 			os.Stdout,
 			&slog.HandlerOptions{Level: slog.LevelDebug}))
 	case config.EnvDev:
-		lg = slog.New(slog.NewJSONHandler(
+		lg = slog.New(slog.NewTextHandler(
 			os.Stdout,
 			&slog.HandlerOptions{Level: slog.LevelInfo}))
 	case config.EnvProd:
