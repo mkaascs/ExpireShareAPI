@@ -30,8 +30,8 @@ func (fs *Service) GetAllFiles(ctx context.Context, command commands.GetAllFiles
 	for _, fileInfo := range filesInfo {
 		result = append(result, results.GetFile{
 			Alias:         fileInfo.Alias,
-			Filename:      fileInfo.Filename,
-			Filesize:      fileInfo.Filesize,
+			Filename:      fileInfo.Name,
+			Filesize:      fileInfo.Size,
 			DownloadsLeft: fileInfo.DownloadsLeft,
 			ExpiresIn:     time.Until(fileInfo.ExpiresAt),
 		})

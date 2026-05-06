@@ -12,7 +12,7 @@ type FileRepo interface {
 
 	GetFileByAlias(ctx context.Context, alias string) (*entities.File, error)
 	GetFilesByUserID(ctx context.Context, userID int64) ([]entities.File, error)
-	CountByUserID(ctx context.Context, userID int64) (int, error)
+	GetFilesStatByUserID(ctx context.Context, userID int64) (*entities.FilesStat, error)
 
 	AddFileTx(ctx context.Context, tx tx.Tx, command commands.AddFile) (int64, error)
 	DecrementDownloadsByAliasTx(ctx context.Context, tx tx.Tx, alias string) (int16, error)

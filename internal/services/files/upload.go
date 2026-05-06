@@ -15,9 +15,9 @@ func (fs *Service) UploadFile(ctx context.Context, command commands.UploadFile) 
 	const fn = "services.file.Service.UploadFile"
 	log := fs.log.With(slog.String("fn", fn))
 
-	filesCount, err := fs.fileRepo.CountByUserID(ctx, command.UserID)
+	filesStat, err := fs.fileRepo.GetFilesStatByUserID(ctx, command.UserID)
 	if err != nil {
-		const msg = "failed to count files by user id"
+		const msg = "failed to get files stat by user id"
 		if isCtxError(err) {
 			log.Info(msg, sl.Error(err), slog.Int64("user_id", command.UserID))
 			return "", err
@@ -27,7 +27,7 @@ func (fs *Service) UploadFile(ctx context.Context, command commands.UploadFile) 
 		return "", fmt.Errorf("%s: %s: %w", fn, msg, err)
 	}
 
-	err = fs.checkUploadQuote(filesCount, command.Filesize, command.Roles)
+	err = fs.checkUploadQuote(*filesStat, command.Filesize, command.Roles)
 	if err != nil {
 		log.Info("access denied", sl.Error(err), slog.Int64("user_id", command.UserID))
 		return "", fmt.Errorf("%s: failed to upload quote: %w", fn, err)

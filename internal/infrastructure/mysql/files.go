@@ -74,7 +74,7 @@ func (fr *FileRepo) GetFileByAlias(ctx context.Context, alias string) (*entities
 
 	var file entities.File
 	err := fr.DB.QueryRowContext(ctx, `SELECT file_name, alias, downloads_left, loaded_at, expires_at, password_hash, user_id FROM files WHERE alias = ? AND expires_at > NOW()`, alias).Scan(
-		&file.Filename,
+		&file.Name,
 		&file.Alias,
 		&file.DownloadsLeft,
 		&file.LoadedAt,
@@ -112,7 +112,7 @@ func (fr *FileRepo) GetFilesByUserID(ctx context.Context, userID int64) ([]entit
 
 	for rows.Next() {
 		var file entities.File
-		if err := rows.Scan(&file.Filename,
+		if err := rows.Scan(&file.Name,
 			&file.Alias,
 			&file.DownloadsLeft,
 			&file.LoadedAt,

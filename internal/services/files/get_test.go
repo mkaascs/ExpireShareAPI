@@ -41,13 +41,13 @@ func TestService_GetFileByAlias(t *testing.T) {
 			DoAndReturn(func(_ context.Context, alias string) (*entities.File, error) {
 				require.Equal(t, command.Alias, alias)
 				return &entities.File{
-					Filename:      "file.txt",
+					Name:          "file.txt",
 					Alias:         command.Alias,
 					PasswordHash:  "",
 					UserID:        command.UserID,
 					DownloadsLeft: 5,
 					ExpiresAt:     time.Now().Add(2 * time.Hour),
-					Filesize:      int64(2 << 10),
+					Size:          int64(2 << 10),
 				}, nil
 			})
 

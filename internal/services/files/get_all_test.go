@@ -29,18 +29,18 @@ func TestService_GetAllFiles(t *testing.T) {
 
 	files := []entities.File{
 		{
-			Filename:      "file.txt",
+			Name:          "file.txt",
 			Alias:         "file-alias1",
 			DownloadsLeft: 5,
 			ExpiresAt:     time.Now().Add(time.Hour),
-			Filesize:      int64(2 << 10),
+			Size:          int64(2 << 10),
 		},
 		{
-			Filename:      "file.pdf",
+			Name:          "file.pdf",
 			Alias:         "file-alias2",
 			DownloadsLeft: 1,
 			ExpiresAt:     time.Now().Add(time.Minute),
-			Filesize:      int64(2 << 42),
+			Size:          int64(2 << 42),
 		},
 	}
 
@@ -63,7 +63,7 @@ func TestService_GetAllFiles(t *testing.T) {
 		require.Len(t, result, len(files))
 		for index := range files {
 			require.Equal(t, files[index].Alias, result[index].Alias)
-			require.Equal(t, files[index].Filename, result[index].Filename)
+			require.Equal(t, files[index].Name, result[index].Filename)
 			require.Equal(t, files[index].DownloadsLeft, result[index].DownloadsLeft)
 			require.WithinDuration(t, files[index].ExpiresAt, time.Now().Add(result[index].ExpiresIn), time.Second)
 		}
