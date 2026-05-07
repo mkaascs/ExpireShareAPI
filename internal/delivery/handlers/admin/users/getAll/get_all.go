@@ -8,12 +8,10 @@ import (
 	"expire-share/internal/domain/dto/users/results"
 	"expire-share/internal/domain/entities"
 	"expire-share/internal/lib/log/sl"
-	"log/slog"
-	"net/http"
-	"strconv"
-
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
+	"log/slog"
+	"net/http"
 )
 
 // Response represents paginated users list response
@@ -53,7 +51,7 @@ func New(getter AllUsersGetter, log *slog.Logger) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())))
 
 		var page, limit int
-		getPaginationArguments(r, &page, &limit)
+		util.ScanPaginationArgs(r, &page, &limit)
 
 		var role *entities.UserRole
 		if roleQuery := r.URL.Query().Get("role"); roleQuery != "" {
@@ -89,20 +87,5 @@ func New(getter AllUsersGetter, log *slog.Logger) http.HandlerFunc {
 			Total: result.Total,
 			Users: result.Users,
 		})
-	}
-}
-
-func getPaginationArguments(r *http.Request, page *int, limit *int) {
-	var err error
-	*page, err = strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || *page < 1 {
-		*page = 1
-	}
-
-	*limit, err = strconv.Atoi(r.URL.Query().Get("limit"))
-	if err != nil || *limit < 1 {
-		*limit = 10
-	} else if *limit > 100 {
-		*limit = 100
 	}
 }

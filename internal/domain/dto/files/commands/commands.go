@@ -27,12 +27,14 @@ type DownloadFile struct {
 }
 
 type GetFile struct {
-	Alias string
-	RequestingUserInfo
+	Alias  string
+	UserID int64
 }
 
 type GetAllFiles struct {
-	RequestingUserInfo
+	Page   int
+	Limit  int
+	UserID int64
 }
 
 type DeleteFile struct {

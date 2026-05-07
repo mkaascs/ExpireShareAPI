@@ -37,10 +37,10 @@ func (m *MockAllFilesGetter) EXPECT() *MockAllFilesGetterMockRecorder {
 }
 
 // GetAllFiles mocks base method.
-func (m *MockAllFilesGetter) GetAllFiles(ctx context.Context, command commands.GetAllFiles) ([]results.GetFile, error) {
+func (m *MockAllFilesGetter) GetAllFiles(ctx context.Context, command commands.GetAllFiles) (*results.GetAllFiles, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllFiles", ctx, command)
-	ret0, _ := ret[0].([]results.GetFile)
+	ret0, _ := ret[0].(*results.GetAllFiles)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

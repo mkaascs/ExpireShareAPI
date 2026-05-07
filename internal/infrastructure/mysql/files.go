@@ -95,13 +95,28 @@ func (fr *FileRepo) GetFileByAlias(ctx context.Context, alias string) (*entities
 	return &file, nil
 }
 
-func (fr *FileRepo) GetFilesByUserID(ctx context.Context, userID int64) ([]entities.File, error) {
+func (fr *FileRepo) GetFilesByUserID(ctx context.Context, command commands.GetAllFiles) ([]entities.File, int, error) {
 	const fn = "repository.mysql.FileRepo.GetFilesByUserID"
 	log := fr.log.With(slog.String("fn", fn))
 
-	rows, err := fr.DB.QueryContext(ctx, `SELECT file_name, file_size, alias, downloads_left, loaded_at, expires_at, password_hash, user_id FROM files WHERE user_id = ? AND expires_at > NOW()`, userID)
+	var total int
+	err := fr.DB.QueryRowContext(ctx, `SELECT COUNT(*) FROM files WHERE user_id = ? AND expires_at > NOW()`, command.UserID).
+		Scan(&total)
+
 	if err != nil {
-		return nil, fmt.Errorf("%s: failed to query sql: %w", fn, err)
+		return nil, 0, fmt.Errorf("%s: failed to query sql: %w", fn, err)
+	}
+
+	if total == 0 {
+		return []entities.File{}, 0, nil
+	}
+
+	offset := (command.Page - 1) * command.Limit
+	rows, err := fr.DB.QueryContext(ctx, `SELECT file_name, file_size, alias, downloads_left, loaded_at, expires_at, password_hash, user_id FROM files WHERE user_id = ? AND expires_at > NOW() LIMIT ? OFFSET ?`,
+		command.UserID, command.Limit, offset)
+
+	if err != nil {
+		return nil, 0, fmt.Errorf("%s: failed to query sql: %w", fn, err)
 	}
 
 	defer func(rows *sql.Rows) {
@@ -122,17 +137,17 @@ func (fr *FileRepo) GetFilesByUserID(ctx context.Context, userID int64) ([]entit
 			&file.ExpiresAt,
 			&file.PasswordHash,
 			&file.UserID); err != nil {
-			return files, fmt.Errorf("%s: failed to scan row: %w", fn, err)
+			return files, total, fmt.Errorf("%s: failed to scan row: %w", fn, err)
 		}
 
 		files = append(files, file)
 	}
 
 	if err := rows.Err(); err != nil {
-		return files, fmt.Errorf("%s: failed to iterate rows: %w", fn, err)
+		return files, total, fmt.Errorf("%s: failed to iterate rows: %w", fn, err)
 	}
 
-	return files, nil
+	return files, total, nil
 }
 
 func (fr *FileRepo) GetFilesStatByUserID(ctx context.Context, userId int64) (*entities.FilesStat, error) {

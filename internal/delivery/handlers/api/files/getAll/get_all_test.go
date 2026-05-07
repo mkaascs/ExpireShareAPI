@@ -43,20 +43,22 @@ func TestHandler_GetAll(t *testing.T) {
 		mockGetter := mocks.NewMockAllFilesGetter(ctrl)
 		mockGetter.EXPECT().
 			GetAllFiles(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, cmd commands.GetAllFiles) ([]results.GetFile, error) {
-				require.Equal(t, claims.UserID, cmd.RequestingUserInfo.UserID)
-				require.Equal(t, claims.Roles, cmd.RequestingUserInfo.Roles)
-				return files, nil
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllFiles) (*results.GetAllFiles, error) {
+				require.Equal(t, claims.UserID, cmd.UserID)
+				require.Equal(t, 1, cmd.Page)
+				require.Equal(t, 10, cmd.Limit)
+				return &results.GetAllFiles{Files: files, Total: len(files)}, nil
 			})
 
 		handler := New(mockGetter, logger)
 		w := httptest.NewRecorder()
-		handler.ServeHTTP(w, newGetRequest(claims))
+		handler.ServeHTTP(w, newGetAllRequest(claims, ""))
 
 		require.Equal(t, http.StatusOK, w.Code)
 
 		var resp Response
 		require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+		require.Equal(t, len(files), resp.Total)
 		require.Len(t, resp.Files, len(files))
 		for index := range files {
 			require.Equal(t, files[index].DownloadsLeft, resp.Files[index].DownloadsLeft)
@@ -64,15 +66,114 @@ func TestHandler_GetAll(t *testing.T) {
 		}
 	})
 
+	t.Run("success with custom pagination", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockGetter := mocks.NewMockAllFilesGetter(ctrl)
+		mockGetter.EXPECT().
+			GetAllFiles(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllFiles) (*results.GetAllFiles, error) {
+				require.Equal(t, 3, cmd.Page)
+				require.Equal(t, 25, cmd.Limit)
+				return &results.GetAllFiles{Files: files, Total: len(files)}, nil
+			})
+
+		handler := New(mockGetter, logger)
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, newGetAllRequest(claims, "?page=3&limit=25"))
+
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("invalid page", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockGetter := mocks.NewMockAllFilesGetter(ctrl)
+		mockGetter.EXPECT().
+			GetAllFiles(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllFiles) (*results.GetAllFiles, error) {
+				require.Equal(t, 1, cmd.Page)
+				return &results.GetAllFiles{}, nil
+			})
+
+		handler := New(mockGetter, logger)
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, newGetAllRequest(claims, "?page=abc"))
+
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("page zero", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockGetter := mocks.NewMockAllFilesGetter(ctrl)
+		mockGetter.EXPECT().
+			GetAllFiles(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllFiles) (*results.GetAllFiles, error) {
+				require.Equal(t, 1, cmd.Page)
+				return &results.GetAllFiles{}, nil
+			})
+
+		handler := New(mockGetter, logger)
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, newGetAllRequest(claims, "?page=0"))
+
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("limit over 100", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockGetter := mocks.NewMockAllFilesGetter(ctrl)
+		mockGetter.EXPECT().
+			GetAllFiles(gomock.Any(), gomock.Any()).
+			DoAndReturn(func(ctx context.Context, cmd commands.GetAllFiles) (*results.GetAllFiles, error) {
+				require.Equal(t, 100, cmd.Limit)
+				return &results.GetAllFiles{}, nil
+			})
+
+		handler := New(mockGetter, logger)
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, newGetAllRequest(claims, "?limit=9999"))
+
+		require.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("empty result", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mockGetter := mocks.NewMockAllFilesGetter(ctrl)
+		mockGetter.EXPECT().
+			GetAllFiles(gomock.Any(), gomock.Any()).
+			Return(&results.GetAllFiles{Files: []results.GetFile{}, Total: 0}, nil)
+
+		handler := New(mockGetter, logger)
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, newGetAllRequest(claims, ""))
+
+		require.Equal(t, http.StatusOK, w.Code)
+
+		var resp Response
+		require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+		require.Equal(t, 0, resp.Total)
+		require.Empty(t, resp.Files)
+	})
+
 	t.Run("missing user claims", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		mockGetter := mocks.NewMockAllFilesGetter(ctrl)
-		handler := New(mockGetter, logger)
+		mockGetter.EXPECT().GetAllFiles(gomock.Any(), gomock.Any()).Times(0)
 
+		handler := New(mockGetter, logger)
 		w := httptest.NewRecorder()
-		handler.ServeHTTP(w, newGetRequest(nil))
+		handler.ServeHTTP(w, newGetAllRequest(nil, ""))
 
 		require.Equal(t, http.StatusInternalServerError, w.Code)
 	})
@@ -83,11 +184,11 @@ func TestHandler_GetAll(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllFilesGetter(ctrl)
 		mockGetter.EXPECT().GetAllFiles(gomock.Any(), gomock.Any()).
-			Return(nil, context.Canceled)
+			Return(&results.GetAllFiles{}, context.Canceled)
 
 		handler := New(mockGetter, logger)
 		w := httptest.NewRecorder()
-		handler.ServeHTTP(w, newGetRequest(claims))
+		handler.ServeHTTP(w, newGetAllRequest(claims, ""))
 
 		require.NotEqual(t, http.StatusInternalServerError, w.Code)
 	})
@@ -98,18 +199,18 @@ func TestHandler_GetAll(t *testing.T) {
 
 		mockGetter := mocks.NewMockAllFilesGetter(ctrl)
 		mockGetter.EXPECT().GetAllFiles(gomock.Any(), gomock.Any()).
-			Return(nil, errors.New("db error"))
+			Return(&results.GetAllFiles{}, errors.New("db error"))
 
 		handler := New(mockGetter, logger)
 		w := httptest.NewRecorder()
-		handler.ServeHTTP(w, newGetRequest(claims))
+		handler.ServeHTTP(w, newGetAllRequest(claims, ""))
 
 		require.Equal(t, http.StatusInternalServerError, w.Code)
 	})
 }
 
-func newGetRequest(claims *middlewares.UserClaims) *http.Request {
-	r := httptest.NewRequest(http.MethodGet, "/file", nil)
+func newGetAllRequest(claims *middlewares.UserClaims, query string) *http.Request {
+	r := httptest.NewRequest(http.MethodGet, "/api/file"+query, nil)
 
 	if claims != nil {
 		ctx := context.WithValue(r.Context(), "user_id", claims.UserID)

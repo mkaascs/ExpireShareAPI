@@ -64,11 +64,8 @@ func New(getter FileGetter, log *slog.Logger) http.HandlerFunc {
 		}
 
 		file, err := getter.GetFileByAlias(r.Context(), commands.GetFile{
-			Alias: alias,
-			RequestingUserInfo: commands.RequestingUserInfo{
-				UserID: claims.UserID,
-				Roles:  claims.Roles,
-			},
+			Alias:  alias,
+			UserID: claims.UserID,
 		})
 
 		if err != nil {

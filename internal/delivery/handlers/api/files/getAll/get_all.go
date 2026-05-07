@@ -28,11 +28,14 @@ type GetFile struct {
 //	@Description	Response with all user files info
 type Response struct {
 	response.Response
+	Total int       `json:"total,omitempty"`
+	Limit int       `json:"limit,omitempty"`
+	Page  int       `json:"page,omitempty"`
 	Files []GetFile `json:"files,omitempty"`
 }
 
 type AllFilesGetter interface {
-	GetAllFiles(ctx context.Context, command commands.GetAllFiles) ([]results.GetFile, error)
+	GetAllFiles(ctx context.Context, command commands.GetAllFiles) (*results.GetAllFiles, error)
 }
 
 // New @Summary Get all user files info
@@ -52,6 +55,9 @@ func New(getter AllFilesGetter, log *slog.Logger) http.HandlerFunc {
 		log := log.With(slog.String("fn", fn),
 			slog.String("request_id", middleware.GetReqID(r.Context())))
 
+		var page, limit int
+		util.ScanPaginationArgs(r, &page, &limit)
+
 		claims, err := middlewares.GetUserClaims(r)
 		if err != nil {
 			log.Error("failed to get user claims", sl.Error(err))
@@ -62,10 +68,9 @@ func New(getter AllFilesGetter, log *slog.Logger) http.HandlerFunc {
 		}
 
 		files, err := getter.GetAllFiles(r.Context(), commands.GetAllFiles{
-			RequestingUserInfo: commands.RequestingUserInfo{
-				UserID: claims.UserID,
-				Roles:  claims.Roles,
-			},
+			Page:   page,
+			Limit:  limit,
+			UserID: claims.UserID,
 		})
 
 		if err != nil {
@@ -82,10 +87,13 @@ func New(getter AllFilesGetter, log *slog.Logger) http.HandlerFunc {
 		}
 
 		result := Response{
-			Files: make([]GetFile, 0, len(files)),
+			Total: files.Total,
+			Page:  page,
+			Limit: limit,
+			Files: make([]GetFile, 0, len(files.Files)),
 		}
 
-		for _, file := range files {
+		for _, file := range files.Files {
 			result.Files = append(result.Files, GetFile{
 				Alias:         file.Alias,
 				Filename:      file.Filename,
@@ -95,7 +103,7 @@ func New(getter AllFilesGetter, log *slog.Logger) http.HandlerFunc {
 			})
 		}
 
-		log.Info("files info was sent", slog.Int64("user_id", claims.UserID), slog.Int("count", len(files)))
+		log.Info("files info was sent", slog.Int64("user_id", claims.UserID), slog.Int("count", len(files.Files)), slog.Int("total", files.Total))
 		render.Status(r, http.StatusOK)
 		render.JSON(w, r, result)
 	}

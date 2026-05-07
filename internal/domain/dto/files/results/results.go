@@ -19,3 +19,8 @@ type GetFile struct {
 	DownloadsLeft int16
 	ExpiresIn     time.Duration
 }
+
+type GetAllFiles struct {
+	Total int
+	Files []GetFile
+}

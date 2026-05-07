@@ -8,7 +8,6 @@ import (
 	"expire-share/internal/domain/entities"
 	domainErrors "expire-share/internal/domain/entities/errors"
 	"expire-share/internal/mocks"
-	"expire-share/internal/testutil"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,11 +23,8 @@ func TestService_GetFileByAlias(t *testing.T) {
 	cfg := config.Config{}
 
 	command := commands.GetFile{
-		Alias: "file-alias",
-		RequestingUserInfo: commands.RequestingUserInfo{
-			UserID: int64(1),
-			Roles:  []entities.UserRole{entities.RoleUser},
-		},
+		Alias:  "file-alias",
+		UserID: 1,
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -61,34 +57,6 @@ func TestService_GetFileByAlias(t *testing.T) {
 		require.Equal(t, int16(5), result.DownloadsLeft)
 		require.Equal(t, int64(2<<10), result.Filesize)
 		require.Positive(t, result.ExpiresIn)
-	})
-
-	t.Run("success admin bypasses access check", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		mockFileRepo := mocks.NewMockFileRepo(ctrl)
-		mockFileStorage := mocks.NewMockFile(ctrl)
-
-		mockFileRepo.EXPECT().GetFileByAlias(gomock.Any(), command.Alias).
-			Return(&entities.File{
-				Alias:        command.Alias,
-				PasswordHash: testutil.HashPassword(t, "some-password"),
-				UserID:       int64(99),
-				ExpiresAt:    time.Now().Add(time.Hour),
-			}, nil)
-
-		fileService := New(mockFileRepo, mockFileStorage, log, cfg)
-		result, err := fileService.GetFileByAlias(context.Background(), commands.GetFile{
-			Alias: command.Alias,
-			RequestingUserInfo: commands.RequestingUserInfo{
-				UserID: int64(1),
-				Roles:  []entities.UserRole{entities.RoleAdmin},
-			},
-		})
-
-		require.NoError(t, err)
-		require.NotNil(t, result)
 	})
 
 	t.Run("file not found", func(t *testing.T) {

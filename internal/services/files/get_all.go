@@ -10,11 +10,11 @@ import (
 	"time"
 )
 
-func (fs *Service) GetAllFiles(ctx context.Context, command commands.GetAllFiles) ([]results.GetFile, error) {
-	const fn = "services.files.Service.GetAllFiles"
+func (fs *Service) GetAllFiles(ctx context.Context, command commands.GetAllFiles) (*results.GetAllFiles, error) {
+	const fn = "services.files.Service.GetFilesByUserID"
 	log := fs.log.With(slog.String("fn", fn))
 
-	filesInfo, err := fs.fileRepo.GetFilesByUserID(ctx, command.UserID)
+	filesInfo, total, err := fs.fileRepo.GetFilesByUserID(ctx, command)
 	if err != nil {
 		const msg = "failed to get user files"
 		if isCtxError(err) {
@@ -26,14 +26,18 @@ func (fs *Service) GetAllFiles(ctx context.Context, command commands.GetAllFiles
 		return nil, fmt.Errorf("%s: %s: %w", fn, msg, err)
 	}
 
-	result := make([]results.GetFile, 0, len(filesInfo))
-	for _, fileInfo := range filesInfo {
-		result = append(result, results.GetFile{
-			Alias:         fileInfo.Alias,
-			Filename:      fileInfo.Name,
-			Filesize:      fileInfo.Size,
-			DownloadsLeft: fileInfo.DownloadsLeft,
-			ExpiresIn:     time.Until(fileInfo.ExpiresAt),
+	result := &results.GetAllFiles{
+		Total: total,
+		Files: make([]results.GetFile, 0, len(filesInfo)),
+	}
+
+	for _, file := range filesInfo {
+		result.Files = append(result.Files, results.GetFile{
+			Alias:         file.Alias,
+			Filename:      file.Name,
+			Filesize:      file.Size,
+			DownloadsLeft: file.DownloadsLeft,
+			ExpiresIn:     time.Until(file.ExpiresAt),
 		})
 	}
 
