@@ -33,7 +33,6 @@ definitions:
         type: array
     type: object
   getAll.GetFile:
-    description: File entry with metadata
     properties:
       alias:
         type: string
@@ -226,6 +225,22 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  stat.Response:
+    description: Response with user file storage stats
+    properties:
+      count:
+        type: integer
+      errors:
+        items:
+          type: string
+        type: array
+      max_count:
+        type: integer
+      max_size:
+        type: integer
+      occupied_size:
+        type: integer
     type: object
   upload.Response:
     description: Response after successful file upload
@@ -560,21 +575,12 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get paginated info about all uploaded user files. Requires authentication.
-      parameters:
-      - description: 'Page number (default: 1)'
-        in: query
-        name: page
-        type: integer
-      - description: 'Items per page (default: 10, max: 100)'
-        in: query
-        name: limit
-        type: integer
+      description: Get info about all uploaded user files. Requires authentication.
       produces:
       - application/json
       responses:
         "200":
-          description: Files list
+          description: OK
           schema:
             $ref: '#/definitions/internal_delivery_handlers_api_files_getAll.Response'
         "401":
@@ -654,6 +660,31 @@ paths:
             $ref: '#/definitions/response.Response'
         "404":
           description: File not found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      tags:
+      - file
+  /api/file/stat:
+    get:
+      consumes:
+      - application/json
+      description: 'Get current user''s file storage statistics: occupied size, total
+        count and their limits.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Storage stats
+          schema:
+            $ref: '#/definitions/stat.Response'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.Response'
         "500":

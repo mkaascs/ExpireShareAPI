@@ -504,7 +504,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get paginated info about all uploaded user files. Requires authentication.",
+                "description": "Get info about all uploaded user files. Requires authentication.",
                 "consumes": [
                     "application/json"
                 ],
@@ -514,25 +514,50 @@ const docTemplate = `{
                 "tags": [
                     "file"
                 ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Page number (default: 1)",
-                        "name": "page",
-                        "in": "query"
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_delivery_handlers_api_files_getAll.Response"
+                        }
                     },
-                    {
-                        "type": "integer",
-                        "description": "Items per page (default: 10, max: 100)",
-                        "name": "limit",
-                        "in": "query"
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
                     }
+                }
+            }
+        },
+        "/api/file/stat": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get current user's file storage statistics: occupied size, total count and their limits.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
                 ],
                 "responses": {
                     "200": {
-                        "description": "Files list",
+                        "description": "Storage stats",
                         "schema": {
-                            "$ref": "#/definitions/internal_delivery_handlers_api_files_getAll.Response"
+                            "$ref": "#/definitions/stat.Response"
                         }
                     },
                     "401": {
@@ -863,7 +888,6 @@ const docTemplate = `{
             }
         },
         "getAll.GetFile": {
-            "description": "File entry with metadata",
             "type": "object",
             "properties": {
                 "alias": {
@@ -1142,6 +1166,30 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "stat.Response": {
+            "description": "Response with user file storage stats",
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "max_count": {
+                    "type": "integer"
+                },
+                "max_size": {
+                    "type": "integer"
+                },
+                "occupied_size": {
+                    "type": "integer"
                 }
             }
         },

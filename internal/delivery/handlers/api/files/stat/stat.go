@@ -8,12 +8,16 @@ import (
 	"expire-share/internal/domain/dto/files/commands"
 	"expire-share/internal/domain/dto/files/results"
 	"expire-share/internal/lib/log/sl"
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
+
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 )
 
+// Response represents file storage statistics response
+//
+//	@Description	Response with user file storage stats
 type Response struct {
 	response.Response
 	OccupiedSize int64 `json:"occupied_size,omitempty"`
@@ -26,6 +30,17 @@ type FilesStatGetter interface {
 	GetFilesStat(ctx context.Context, command commands.GetFilesStat) (*results.GetFilesStat, error)
 }
 
+// New @Summary Get file storage stats
+//
+//	@Description	Get current user's file storage statistics: occupied size, total count and their limits.
+//	@Tags			file
+//	@Accept			json
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Success		200	{object}	Response			"Storage stats"
+//	@Failure		401	{object}	response.Response	"Unauthorized"
+//	@Failure		500	{object}	response.Response	"Internal server error"
+//	@Router			/api/file/stat [get]
 func New(getter FilesStatGetter, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "http.file.stat.New"
