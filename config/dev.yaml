@@ -3,7 +3,6 @@ db_host: "mysql:3306"
 storage:
   type: "local"
   path: "./storage/"
-  max_file_size: "500mb"
 http_server:
   port: 8080
   timeout: 4s
@@ -39,7 +38,8 @@ service:
   alias_length: 6
   file_worker_delay: 5m
   permissions:
-    max_uploaded_files_for_vip: 10
-    max_uploaded_files_for_user: 1
+    max_uploaded_files: 50
+    max_files_size_for_user: "500mb"
+    max_files_size_for_vip: "2gb"
 auth_service:
   addr: "auth-service:5505"
