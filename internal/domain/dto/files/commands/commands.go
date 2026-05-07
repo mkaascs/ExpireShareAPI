@@ -31,6 +31,10 @@ type GetFile struct {
 	UserID int64
 }
 
+type GetFilesStat struct {
+	RequestingUserInfo
+}
+
 type GetAllFiles struct {
 	Page   int
 	Limit  int

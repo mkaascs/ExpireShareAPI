@@ -158,6 +158,10 @@ func (fr *FileRepo) GetFilesStatByUserID(ctx context.Context, userId int64) (*en
 		Scan(&stat.Count, &stat.Size)
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domainErrors.ErrUserNotFound
+		}
+
 		return nil, fmt.Errorf("%s: failed to query sql: %w", fn, err)
 	}
 

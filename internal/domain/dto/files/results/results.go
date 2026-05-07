@@ -1,6 +1,7 @@
 package results
 
 import (
+	"expire-share/internal/domain/entities"
 	"io"
 	"os"
 	"time"
@@ -23,4 +24,10 @@ type GetFile struct {
 type GetAllFiles struct {
 	Total int
 	Files []GetFile
+}
+
+type GetFilesStat struct {
+	Stat     entities.FilesStat
+	MaxSize  int64
+	MaxCount int
 }

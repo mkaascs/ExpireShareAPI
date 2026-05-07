@@ -7,6 +7,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type userLimits struct {
+	MaxUploadedFiles int
+	MaxSize          int64
+}
+
 func (fs *Service) checkAccess(fileInfo entities.File, userID int64, roles []entities.UserRole) error {
 	if hasRole(roles, entities.RoleAdmin) {
 		return nil
@@ -54,6 +59,20 @@ func (fs *Service) checkPassword(fileInfo entities.File, password string) error 
 	}
 
 	return nil
+}
+
+func (fs *Service) getUserLimits(roles []entities.UserRole) userLimits {
+	if hasRole(roles, entities.RoleAdmin) || hasRole(roles, entities.RoleVip) {
+		return userLimits{
+			MaxUploadedFiles: fs.cfg.Permissions.MaxUploadedFiles,
+			MaxSize:          fs.cfg.Permissions.MaxFilesSizeForVipInBytes,
+		}
+	}
+
+	return userLimits{
+		MaxUploadedFiles: fs.cfg.Permissions.MaxUploadedFiles,
+		MaxSize:          fs.cfg.Permissions.MaxFilesSizeForUserInBytes,
+	}
 }
 
 func hasRole(roles []entities.UserRole, role entities.UserRole) bool {
