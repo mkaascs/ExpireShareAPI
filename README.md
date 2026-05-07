@@ -48,13 +48,14 @@ Full Swagger documentation available at `/swagger/index.html` when running local
 
 ### Files
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-----------------------------------------------------|
-| `POST` | `/api/upload` | Required | Upload a file |
-| `GET` | `/api/file` | Required | Get all user file info (downloads left, expires in) |
-| `GET` | `/api/file/{alias}` | Required | Get file info (downloads left, expires in) |
-| `DELETE` | `/api/file/{alias}` | Required | Delete a file |
-| `GET` | `/download/{alias}` | — | Download a file |
+| Method | Endpoint            | Auth | Description                                         |
+|--------|---------------------|------|-----------------------------------------------------|
+| `POST` | `/api/upload`       | Required | Upload a file                                       |
+| `GET` | `/api/file`         | Required | Get all user file info (downloads left, expires in) |
+| `GET` | `/api/file/stat`    | Required | Get user files stat                                 |
+| `GET` | `/api/file/{alias}` | Required | Get file info (downloads left, expires in)          |
+| `DELETE` | `/api/file/{alias}` | Required | Delete a file                                       |
+| `GET` | `/download/{alias}` | — | Download a file                                     |
 
 ### Admin
 
