@@ -28,12 +28,13 @@ import (
 	"expire-share/internal/infrastructure/storage/local"
 	"expire-share/internal/services/files"
 	"expire-share/internal/services/worker"
+	"log/slog"
+	"net/http"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"log/slog"
-	"net/http"
 )
 
 type App struct {

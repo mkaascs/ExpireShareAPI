@@ -33,6 +33,7 @@ definitions:
         type: array
     type: object
   getAll.GetFile:
+    description: File entry with metadata
     properties:
       alias:
         type: string
@@ -42,6 +43,8 @@ definitions:
         type: string
       filename:
         type: string
+      filesize:
+        type: integer
     type: object
   internal_delivery_handlers_admin_users_get.Response:
     description: Response with user info
@@ -84,6 +87,8 @@ definitions:
         type: string
       filename:
         type: string
+      filesize:
+        type: integer
     type: object
   internal_delivery_handlers_api_files_getAll.Response:
     description: Response with all user files info
@@ -96,6 +101,12 @@ definitions:
         items:
           $ref: '#/definitions/getAll.GetFile'
         type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
     type: object
   login.Request:
     description: Login credentials for authentication
@@ -139,14 +150,6 @@ definitions:
     required:
     - access_token
     - refresh_token
-    type: object
-  logout.Response:
-    description: Empty response on successful logout
-    properties:
-      errors:
-        items:
-          type: string
-        type: array
     type: object
   refresh.Request:
     description: Refresh token for obtaining new access token
@@ -460,8 +463,6 @@ paths:
       responses:
         "200":
           description: Logout successful
-          schema:
-            $ref: '#/definitions/logout.Response'
         "400":
           description: Invalid request body
           schema:
@@ -559,12 +560,21 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get info about all uploaded user files. Requires authentication.
+      description: Get paginated info about all uploaded user files. Requires authentication.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10, max: 100)'
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Files list
           schema:
             $ref: '#/definitions/internal_delivery_handlers_api_files_getAll.Response'
         "401":

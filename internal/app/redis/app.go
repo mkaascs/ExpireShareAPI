@@ -5,9 +5,10 @@ import (
 	"expire-share/internal/config"
 	"expire-share/internal/lib/log/sl"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"log/slog"
 	"os"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type App struct {

@@ -354,10 +354,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Logout successful",
-                        "schema": {
-                            "$ref": "#/definitions/logout.Response"
-                        }
+                        "description": "Logout successful"
                     },
                     "400": {
                         "description": "Invalid request body",
@@ -507,7 +504,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get info about all uploaded user files. Requires authentication.",
+                "description": "Get paginated info about all uploaded user files. Requires authentication.",
                 "consumes": [
                     "application/json"
                 ],
@@ -517,9 +514,23 @@ const docTemplate = `{
                 "tags": [
                     "file"
                 ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 10, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Files list",
                         "schema": {
                             "$ref": "#/definitions/internal_delivery_handlers_api_files_getAll.Response"
                         }
@@ -852,6 +863,7 @@ const docTemplate = `{
             }
         },
         "getAll.GetFile": {
+            "description": "File entry with metadata",
             "type": "object",
             "properties": {
                 "alias": {
@@ -865,6 +877,9 @@ const docTemplate = `{
                 },
                 "filename": {
                     "type": "string"
+                },
+                "filesize": {
+                    "type": "integer"
                 }
             }
         },
@@ -928,6 +943,9 @@ const docTemplate = `{
                 },
                 "filename": {
                     "type": "string"
+                },
+                "filesize": {
+                    "type": "integer"
                 }
             }
         },
@@ -946,6 +964,15 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/getAll.GetFile"
                     }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -1006,18 +1033,6 @@ const docTemplate = `{
                 },
                 "refresh_token": {
                     "type": "string"
-                }
-            }
-        },
-        "logout.Response": {
-            "description": "Empty response on successful logout",
-            "type": "object",
-            "properties": {
-                "errors": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },

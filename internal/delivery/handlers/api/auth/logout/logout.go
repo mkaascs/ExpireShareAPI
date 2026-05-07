@@ -39,8 +39,8 @@ type UserLogout interface {
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body		Request				true	"Tokens to invalidate"
-//	@Success		200		{object}	Response			"Logout successful"
+//	@Param			request	body	Request	true	"Tokens to invalidate"
+//	@Success		200		"Logout successful"
 //	@Failure		400		{object}	response.Response	"Invalid request body"
 //	@Failure		401		{object}	response.Response	"Invalid tokens"
 //	@Failure		422		{object}	response.Response	"Validation error"

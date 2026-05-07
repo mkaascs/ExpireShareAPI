@@ -15,6 +15,9 @@ import (
 	"github.com/go-chi/render"
 )
 
+// GetFile represents a single file entry in the list
+//
+//	@Description	File entry with metadata
 type GetFile struct {
 	Alias         string `json:"alias"`
 	Filename      string `json:"filename"`
@@ -40,14 +43,16 @@ type AllFilesGetter interface {
 
 // New @Summary Get all user files info
 //
-//	@Description	Get info about all uploaded user files. Requires authentication.
+//	@Description	Get paginated info about all uploaded user files. Requires authentication.
 //	@Tags			file
 //	@Accept			json
 //	@Produce		json
 //	@Security		BearerAuth
-//	@Success		200	{object}	Response
-//	@Failure		401	{object}	response.Response	"Unauthorized"
-//	@Failure		500	{object}	response.Response	"Internal server error"
+//	@Param			page	query		int					false	"Page number (default: 1)"
+//	@Param			limit	query		int					false	"Items per page (default: 10, max: 100)"
+//	@Success		200		{object}	Response			"Files list"
+//	@Failure		401		{object}	response.Response	"Unauthorized"
+//	@Failure		500		{object}	response.Response	"Internal server error"
 //	@Router			/api/file/ [get]
 func New(getter AllFilesGetter, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
