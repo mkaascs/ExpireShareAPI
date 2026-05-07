@@ -34,7 +34,8 @@ func TestHandler_Get(t *testing.T) {
 			GetFileByAlias(gomock.Any(), gomock.Any()).
 			DoAndReturn(func(ctx context.Context, cmd commands.GetFile) (*results.GetFile, error) {
 				require.Equal(t, "abc123", cmd.Alias)
-				require.Equal(t, int64(1), cmd.UserID)
+				require.Equal(t, int64(1), cmd.RequestingUserInfo.UserID)
+				require.Equal(t, claims.Roles, cmd.RequestingUserInfo.Roles)
 				return &results.GetFile{
 					DownloadsLeft: 3,
 					ExpiresIn:     2 * time.Hour,

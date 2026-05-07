@@ -28,7 +28,7 @@ func (fs *Service) GetFileByAlias(ctx context.Context, command commands.GetFile)
 		return nil, fmt.Errorf("%s: %s: %w", fn, msg, err)
 	}
 
-	err = fs.checkOwner(*fileInfo, command.UserID)
+	err = fs.checkAccess(*fileInfo, command.UserID, command.Roles)
 	if err != nil {
 		log.Info("access denied", sl.Error(err), slog.String("alias", command.Alias))
 		return nil, fmt.Errorf("%s: access denied: %w", fn, err)

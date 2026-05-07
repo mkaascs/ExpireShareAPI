@@ -239,7 +239,7 @@ func TestHandler_Upload(t *testing.T) {
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, r)
 
-		require.Equal(t, http.StatusUnprocessableEntity, w.Code)
+		require.Equal(t, http.StatusRequestEntityTooLarge, w.Code)
 	})
 
 	t.Run("context canceled", func(t *testing.T) {

@@ -23,8 +23,11 @@ func TestService_GetFileByAlias(t *testing.T) {
 	cfg := config.Config{}
 
 	command := commands.GetFile{
-		Alias:  "file-alias",
-		UserID: 1,
+		Alias: "file-alias",
+		RequestingUserInfo: commands.RequestingUserInfo{
+			UserID: 1,
+			Roles:  []entities.UserRole{entities.RoleUser},
+		},
 	}
 
 	t.Run("success", func(t *testing.T) {
@@ -85,7 +88,7 @@ func TestService_GetFileByAlias(t *testing.T) {
 		mockFileRepo.EXPECT().GetFileByAlias(gomock.Any(), command.Alias).
 			Return(&entities.File{
 				Alias:  command.Alias,
-				UserID: int64(99),
+				UserID: int64(99), // другой владелец
 			}, nil)
 
 		fileService := New(mockFileRepo, mockFileStorage, log, cfg)

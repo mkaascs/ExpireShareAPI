@@ -27,8 +27,8 @@ type DownloadFile struct {
 }
 
 type GetFile struct {
-	Alias  string
-	UserID int64
+	Alias string
+	RequestingUserInfo
 }
 
 type GetFilesStat struct {
