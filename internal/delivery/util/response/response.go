@@ -71,7 +71,7 @@ func RenderFileServiceError(w http.ResponseWriter, r *http.Request, err error) b
 
 	if errors.Is(err, domainErrors.ErrFileSizeTooBig) {
 		RenderError(w, r,
-			http.StatusUnprocessableEntity,
+			http.StatusRequestEntityTooLarge,
 			"file size is very big")
 		return true
 	}
