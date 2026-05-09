@@ -5,7 +5,7 @@ storage:
   path: "./storage/"
 http_server:
   port: 8080
-  timeout: 4s
+  timeout: 10s
   idle_timeout: 60s
   cors:
     allowed_credentials: true

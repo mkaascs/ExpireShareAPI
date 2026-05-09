@@ -1,6 +1,7 @@
 services:
   mysql:
     image: mysql:8.0
+    command: --default-time-zone=+00:00
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ExpireShare
