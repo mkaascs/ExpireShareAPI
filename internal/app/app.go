@@ -111,6 +111,10 @@ func (a *App) MustMountHandlers() {
 
 	a.HTTP.Router.With(myMiddleware.NewRateLimiter(
 		rateLimiter.NewRateLimiter(a.Redis.Client, a.config.RateLimiter.Files), a.logger)).
+		With(myMiddleware.NewTimeoutLimiter(myMiddleware.TimeoutLimiterParams{
+			ReadTimeout:  10 * time.Minute,
+			WriteTimeout: 1 * time.Minute,
+		}, a.logger)).
 		Get("/download/{alias}", download.New(fileService, a.logger))
 
 	a.HTTP.Router.Route("/api", func(r chi.Router) {
