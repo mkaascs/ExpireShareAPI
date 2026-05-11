@@ -37,10 +37,11 @@ type Storage struct {
 }
 
 type HttpServer struct {
-	Port        int           `yaml:"port" env-required:"true"`
-	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
-	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
-	CORS        `yaml:"cors"`
+	Port         int           `yaml:"port" env-required:"true"`
+	WriteTimeout time.Duration `yaml:"write_timeout" env-default:"5s"`
+	ReadTimeout  time.Duration `yaml:"read_timeout" env-default:"10s"`
+	IdleTimeout  time.Duration `yaml:"idle_timeout" env-default:"60s"`
+	CORS         `yaml:"cors"`
 }
 
 type Redis struct {
