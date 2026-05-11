@@ -31,6 +31,7 @@ import (
 	"expire-share/internal/services/worker"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -115,7 +116,11 @@ func (a *App) MustMountHandlers() {
 	a.HTTP.Router.Route("/api", func(r chi.Router) {
 		r.Route("/", func(r chi.Router) {
 			r.Use(myMiddleware.NewAuth(authClient, a.logger))
-			r.Post("/upload", upload.New(fileService, a.logger, a.config))
+			r.With(myMiddleware.NewTimeoutLimiter(myMiddleware.TimeoutLimiterParams{
+				ReadTimeout:  10 * time.Minute,
+				WriteTimeout: time.Minute,
+			}, a.logger)).
+				Post("/upload", upload.New(fileService, a.logger, a.config))
 
 			r.Route("/file", func(r chi.Router) {
 				r.Get("/", getAll.New(fileService, a.logger))

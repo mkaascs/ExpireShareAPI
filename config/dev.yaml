@@ -6,7 +6,7 @@ storage:
 http_server:
   port: 8080
   write_timeout: 5s
-  read_timeout: 90s
+  read_timeout: 10s
   idle_timeout: 60s
   cors:
     allowed_credentials: true
