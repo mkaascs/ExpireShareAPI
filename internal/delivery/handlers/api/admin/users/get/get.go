@@ -43,7 +43,7 @@ type UserGetter interface {
 //	@Router			/api/admin/users/{id} [get]
 func New(getter UserGetter, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const fn = "http.admin.users.get.New"
+		const fn = "http.api.admin.users.get.New"
 		log := log.With(
 			slog.String("fn", fn),
 			slog.String("request_id", middleware.GetReqID(r.Context())))

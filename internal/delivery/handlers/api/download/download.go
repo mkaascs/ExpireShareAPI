@@ -46,7 +46,7 @@ type FileDownloader interface {
 //	@Router			/download/{alias} [get]
 func New(downloader FileDownloader, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const fn = "http.download.New"
+		const fn = "http.api.download.New"
 		log := log.With(
 			slog.String("fn", fn),
 			slog.String("request_id", middleware.GetReqID(r.Context())))

@@ -8,20 +8,20 @@ import (
 	"expire-share/internal/app/mysql"
 	redisApp "expire-share/internal/app/redis"
 	"expire-share/internal/config"
-	userGet "expire-share/internal/delivery/handlers/admin/users/get"
-	userGetAll "expire-share/internal/delivery/handlers/admin/users/getAll"
-	"expire-share/internal/delivery/handlers/admin/users/roles/assign"
-	"expire-share/internal/delivery/handlers/admin/users/roles/revoke"
+	userGet "expire-share/internal/delivery/handlers/api/admin/users/get"
+	userGetAll "expire-share/internal/delivery/handlers/api/admin/users/getAll"
+	"expire-share/internal/delivery/handlers/api/admin/users/roles/assign"
+	"expire-share/internal/delivery/handlers/api/admin/users/roles/revoke"
 	"expire-share/internal/delivery/handlers/api/auth/login"
 	"expire-share/internal/delivery/handlers/api/auth/logout"
 	"expire-share/internal/delivery/handlers/api/auth/refresh"
 	"expire-share/internal/delivery/handlers/api/auth/register"
+	"expire-share/internal/delivery/handlers/api/download"
 	"expire-share/internal/delivery/handlers/api/files/delete"
 	"expire-share/internal/delivery/handlers/api/files/get"
 	"expire-share/internal/delivery/handlers/api/files/getAll"
 	"expire-share/internal/delivery/handlers/api/files/stat"
 	"expire-share/internal/delivery/handlers/api/upload"
-	"expire-share/internal/delivery/handlers/download"
 	myMiddleware "expire-share/internal/delivery/middlewares"
 	"expire-share/internal/infrastructure/grpc"
 	repo "expire-share/internal/infrastructure/mysql"
@@ -109,34 +109,14 @@ func (a *App) MustMountHandlers() {
 		))
 	}
 
-	a.HTTP.Router.With(myMiddleware.NewRateLimiter(
-		rateLimiter.NewRateLimiter(a.Redis.Client, a.config.RateLimiter.Files), a.logger)).
-		With(myMiddleware.NewTimeoutLimiter(myMiddleware.TimeoutLimiterParams{
-			ReadTimeout:  10 * time.Minute,
-			WriteTimeout: 1 * time.Minute,
-		}, a.logger)).
-		Get("/download/{alias}", download.New(fileService, a.logger))
-
 	a.HTTP.Router.Route("/api", func(r chi.Router) {
-		r.Route("/", func(r chi.Router) {
-			r.Use(myMiddleware.NewAuth(authClient, a.logger))
-			r.With(myMiddleware.NewTimeoutLimiter(myMiddleware.TimeoutLimiterParams{
+		a.HTTP.Router.With(myMiddleware.NewRateLimiter(
+			rateLimiter.NewRateLimiter(a.Redis.Client, a.config.RateLimiter.Files), a.logger)).
+			With(myMiddleware.NewTimeoutLimiter(myMiddleware.TimeoutLimiterParams{
 				ReadTimeout:  10 * time.Minute,
-				WriteTimeout: time.Minute,
+				WriteTimeout: 1 * time.Minute,
 			}, a.logger)).
-				Post("/upload", upload.New(fileService, a.logger, a.config))
-
-			r.Route("/file", func(r chi.Router) {
-				r.Get("/", getAll.New(fileService, a.logger))
-
-				r.Get("/stat", stat.New(fileService, a.logger))
-
-				r.Route("/{alias}", func(r chi.Router) {
-					r.Get("/", get.New(fileService, a.logger))
-					r.Delete("/", delete.New(fileService, a.logger))
-				})
-			})
-		})
+			Get("/download/{alias}", download.New(fileService, a.logger))
 
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(myMiddleware.NewAdminAuth(
@@ -153,6 +133,26 @@ func (a *App) MustMountHandlers() {
 
 					r.With(myMiddleware.NewBodyParser[revoke.Request](a.config.Service, a.logger)).
 						Post("/revoke", revoke.New(userClient, a.logger))
+				})
+			})
+		})
+
+		r.Route("/", func(r chi.Router) {
+			r.Use(myMiddleware.NewAuth(authClient, a.logger))
+			r.With(myMiddleware.NewTimeoutLimiter(myMiddleware.TimeoutLimiterParams{
+				ReadTimeout:  10 * time.Minute,
+				WriteTimeout: time.Minute,
+			}, a.logger)).
+				Post("/upload", upload.New(fileService, a.logger, a.config))
+
+			r.Route("/file", func(r chi.Router) {
+				r.Get("/", getAll.New(fileService, a.logger))
+
+				r.Get("/stat", stat.New(fileService, a.logger))
+
+				r.Route("/{alias}", func(r chi.Router) {
+					r.Get("/", get.New(fileService, a.logger))
+					r.Delete("/", delete.New(fileService, a.logger))
 				})
 			})
 		})
