@@ -17,16 +17,10 @@ import (
 	"github.com/go-chi/render"
 )
 
-// Response represents revoke role response
-//
-//	@Description	Empty success response
 type Response struct {
 	response.Response
 }
 
-// Request represents revoke role request body
-//
-//	@Description	Role revocation request
 type Request struct {
 	Role string `json:"role" example:"vip"`
 }
@@ -35,21 +29,6 @@ type RoleRevoker interface {
 	RevokeRole(ctx context.Context, command commands.RevokeRole) error
 }
 
-// New @Summary Revoke role from user
-//
-//	@Description	Revoke a role from user by their ID. Requires admin secret authorization.
-//	@Tags			admin
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			id		path		int					true	"User ID"
-//	@Param			request	body		Request				true	"Role to revoke"
-//	@Success		204		{object}	Response			"Role revoked"
-//	@Failure		400		{object}	response.Response	"Invalid user ID"
-//	@Failure		401		{object}	response.Response	"Unauthorized"
-//	@Failure		404		{object}	response.Response	"User not found"
-//	@Failure		500		{object}	response.Response	"Internal server error"
-//	@Router			/api/admin/users/{id}/roles/revoke [post]
 func New(revoker RoleRevoker, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "http.api.admin.users.roles.revoke.New"

@@ -15,9 +15,6 @@ import (
 	"github.com/go-chi/render"
 )
 
-// Response represents paginated users list response
-//
-//	@Description	Response with paginated users list
 type Response struct {
 	response.Response
 	Page  int             `json:"page,omitempty"`
@@ -30,20 +27,6 @@ type AllUsersGetter interface {
 	GetAllUsers(ctx context.Context, command commands.GetAllUsers) (*results.GetAllUsers, error)
 }
 
-// New @Summary Get all users
-//
-//	@Description	Get paginated list of all users. Optionally filter by role. Requires admin secret authorization.
-//	@Tags			admin
-//	@Accept			json
-//	@Produce		json
-//	@Security		BearerAuth
-//	@Param			page	query		int					false	"Page number (default: 1)"
-//	@Param			limit	query		int					false	"Items per page (default: 10, max: 100)"
-//	@Param			role	query		string				false	"Filter by role (user, vip, admin)"
-//	@Success		200		{object}	Response			"Users list"
-//	@Failure		401		{object}	response.Response	"Unauthorized"
-//	@Failure		500		{object}	response.Response	"Internal server error"
-//	@Router			/api/admin/users [get]
 func New(getter AllUsersGetter, log *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = "http.api.admin.users.getAll.New"

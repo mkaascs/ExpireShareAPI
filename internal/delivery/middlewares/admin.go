@@ -8,11 +8,12 @@ import (
 	"expire-share/internal/delivery/util/response"
 	"expire-share/internal/domain/entities"
 	"expire-share/internal/lib/log/sl"
-	"github.com/go-chi/chi"
 	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/go-chi/chi"
 )
 
 func NewAdminAuth(rateLimiter RateLimiter, log *slog.Logger) func(next http.Handler) http.Handler {
