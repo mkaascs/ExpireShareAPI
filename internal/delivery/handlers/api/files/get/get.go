@@ -21,8 +21,8 @@ import (
 //	@Description	Response with file info
 type Response struct {
 	response.Response
-	Filename      string `json:"filename"`
-	Filesize      int64  `json:"filesize"`
+	Filename      string `json:"filename,omitempty"`
+	Filesize      int64  `json:"filesize,omitempty"`
 	DownloadsLeft int16  `json:"downloads_left,omitempty"`
 	ExpiresIn     string `json:"expires_in,omitempty"`
 }
