@@ -59,12 +59,16 @@ Full Swagger documentation available at `/swagger/index.html` when running local
 
 ### Admin
 
-| Method | Endpoint | Auth | Description |
-|--------|--------------------------------------|------|-----------------------|
-| `GET` | `/api/admin/users` | Required | Get all users info |
-| `GET` | `/api/admin/users/{id}` | Required | Get user info by ID |
-| `POST` | `/api/admin/users/{id}/roles/assign` | Required | Assign a role to user |
-| `POST` | `/api/admin/users/{id}/roles/revoke` | Required | Revoke a role of user |
+| Method   | Endpoint                             | Auth | Description              |
+|----------|--------------------------------------|------|--------------------------|
+| `GET`    | `/api/admin/users`                   | Required | Get all users info       |
+| `GET`    | `/api/admin/users/{id}`              | Required | Get user info by ID      |
+| `GET`    | `/api/admin/users/{id}/files`        | Required | Get all user files info  |
+| `GET`    | `/api/admin/users/{id}/files/stat`   | Required | Get user files stat      |
+| `POST`   | `/api/admin/users/{id}/roles/assign` | Required | Assign a role to user    |
+| `POST`   | `/api/admin/users/{id}/roles/revoke` | Required | Revoke a role of user    |
+| `GET`    | `/api/admin/files/{alias}`           | Required | Get file info by alias   |
+| `DELETE` | `/api/admin/files/{alias}`           | Required | Delete file by alias |
 
 #### Upload request (multipart/form-data)
 
