@@ -1,19 +1,23 @@
 package middlewares
 
 import (
+	"context"
 	"crypto/subtle"
 	"encoding/base64"
 	"expire-share/internal/delivery/util"
 	"expire-share/internal/delivery/util/response"
+	"expire-share/internal/domain/entities"
 	"expire-share/internal/lib/log/sl"
+	"github.com/go-chi/chi"
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func NewAdminAuth(rateLimiter RateLimiter, log *slog.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		log := log.With(slog.String("component", "middleware/admin"))
+		log := log.With(slog.String("component", "middleware/admin-auth"))
 
 		adminSecret, err := base64.StdEncoding.DecodeString(os.Getenv("ADMIN_SECRET_BASE64"))
 		if err != nil || len(adminSecret) == 0 {
@@ -74,6 +78,26 @@ func NewAdminAuth(rateLimiter RateLimiter, log *slog.Logger) func(next http.Hand
 			response.RenderError(w, r,
 				http.StatusUnauthorized,
 				"unauthorized request")
+		})
+	}
+}
+
+func NewAdminUserContext(log *slog.Logger) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		log := log.With(slog.String("component", "middleware/admin-context"))
+
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			userID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+			if err != nil {
+				log.Info("failed to parse user id. default user id was set")
+				userID = 0
+			}
+
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, userIDField, userID)
+			ctx = context.WithValue(ctx, rolesField, []entities.UserRole{entities.RoleAdmin})
+
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }

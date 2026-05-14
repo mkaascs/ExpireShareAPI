@@ -124,8 +124,15 @@ func (a *App) MustMountHandlers() {
 				a.logger))
 
 			r.Route("/users", func(r chi.Router) {
-				r.Get("/{id}", userGet.New(userClient, a.logger))
 				r.Get("/", userGetAll.New(userClient, a.logger))
+
+				r.Route("/{id}", func(r chi.Router) {
+					r.Use(myMiddleware.NewAdminUserContext(a.logger))
+
+					r.Get("/", userGet.New(userClient, a.logger))
+					r.Get("/files", getAll.New(fileService, a.logger))
+					r.Get("/files/stat", stat.New(fileService, a.logger))
+				})
 
 				r.Route("/{id}/roles", func(r chi.Router) {
 					r.With(myMiddleware.NewBodyParser[assign.Request](a.config.Service, a.logger)).
@@ -134,6 +141,12 @@ func (a *App) MustMountHandlers() {
 					r.With(myMiddleware.NewBodyParser[revoke.Request](a.config.Service, a.logger)).
 						Post("/revoke", revoke.New(userClient, a.logger))
 				})
+			})
+
+			r.Route("/files/{alias}", func(r chi.Router) {
+				r.Use(myMiddleware.NewAdminUserContext(a.logger))
+				r.Get("/", get.New(fileService, a.logger))
+				r.Delete("/", delete.New(fileService, a.logger))
 			})
 		})
 
