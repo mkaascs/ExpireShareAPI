@@ -56,7 +56,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Users list",
                         "schema": {
-                            "$ref": "#/definitions/internal_delivery_handlers_admin_users_getAll.Response"
+                            "$ref": "#/definitions/internal_delivery_handlers_api_admin_users_getAll.Response"
                         }
                     },
                     "401": {
@@ -104,7 +104,7 @@ const docTemplate = `{
                     "200": {
                         "description": "User info",
                         "schema": {
-                            "$ref": "#/definitions/internal_delivery_handlers_admin_users_get.Response"
+                            "$ref": "#/definitions/internal_delivery_handlers_api_admin_users_get.Response"
                         }
                     },
                     "400": {
@@ -907,7 +907,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_delivery_handlers_admin_users_get.Response": {
+        "internal_delivery_handlers_api_admin_users_get.Response": {
             "description": "Response with user info",
             "type": "object",
             "properties": {
@@ -922,7 +922,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_delivery_handlers_admin_users_getAll.Response": {
+        "internal_delivery_handlers_api_admin_users_getAll.Response": {
             "description": "Response with paginated users list",
             "type": "object",
             "properties": {
